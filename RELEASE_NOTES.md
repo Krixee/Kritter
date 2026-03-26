@@ -11,7 +11,7 @@
 
 ## Release Asset
 
-- `Kritter-v1.0.0-win-x64.zip`
+- `Kritter-v1.0.0.exe`
 
 ## Requirements
 

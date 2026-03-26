@@ -37,11 +37,12 @@ dotnet build Kritter.sln
 ## Publish
 
 ```powershell
-dotnet publish Kritter\\Kritter.csproj -c Release -r win-x64 --self-contained false
+dotnet publish Kritter\\Kritter.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true
 ```
 
 ## Notes
 
 - The UI is currently in Turkish.
 - Optimization scripts modify Windows settings. Creating a restore point before use is recommended.
+- Release builds can be published as a single executable.
 - Build outputs are intentionally excluded from source control.
