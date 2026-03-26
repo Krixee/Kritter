@@ -1,0 +1,12 @@
+bin/
+obj/
+publish/
+artifacts/
+.vs/
+.claude/
+CLAUDE.md
+*.user
+*.suo
+*.cache
+*.pdb
+*.kritter

@@ -1,0 +1,99 @@
+<Window x:Class="Kritter.Views.Fr33tyModal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Kritter.ViewModels"
+        xmlns:models="clr-namespace:Kritter.Models"
+        Title="Fr33ty Script Seçimi" Width="600" Height="500"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BgBrush}"
+        ResizeMode="CanResizeWithGrip">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0" Text="Fr33ty Optimizasyon Scriptleri" FontSize="18" FontWeight="Bold"
+                   Margin="0,0,0,4"/>
+        <TextBlock Grid.Row="0" Text="Uygulamak istediğiniz scriptleri seçin."
+                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,24,0,12"/>
+
+        <!-- Select/Deselect Buttons -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+            <Button Content="Tümünü Seç" Style="{StaticResource GhostButton}"
+                    Command="{Binding SelectAllCommand}" Margin="0,0,8,0"/>
+            <Button Content="Tümünü Kaldır" Style="{StaticResource GhostButton}"
+                    Command="{Binding DeselectAllCommand}"/>
+        </StackPanel>
+
+        <!-- Category Tree -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Categories}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:ScriptCategoryViewModel}">
+                        <Border Background="{StaticResource CardBrush}" CornerRadius="6"
+                                Margin="0,0,0,8" Padding="12" BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1">
+                            <StackPanel>
+                                <!-- Category Header -->
+                                <ToggleButton x:Name="expandToggle" IsChecked="{Binding IsExpanded}"
+                                              Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                              HorizontalContentAlignment="Left">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <DockPanel>
+                                                <TextBlock x:Name="arrow" Text="&#x25B6;" FontSize="10"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                <TextBlock Text="{Binding CategoryName}" FontSize="14"
+                                                           FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
+                                                <TextBlock Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="12" VerticalAlignment="Center" Margin="10,0,0,0">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="({0}/{1})">
+                                                            <Binding Path="SelectedCount"/>
+                                                            <Binding Path="TotalCount"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </DockPanel>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="arrow" Property="Text" Value="&#x25BC;"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <!-- Scripts List -->
+                                <ItemsControl ItemsSource="{Binding Scripts}" Margin="20,8,0,0"
+                                              Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type models:OptimizationScript}">
+                                            <CheckBox IsChecked="{Binding IsSelected}" Margin="0,3">
+                                                <TextBlock Text="{Binding DisplayName}"/>
+                                            </CheckBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- OK / Cancel -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="İptal" Style="{StaticResource GhostButton}" Margin="0,0,8,0"
+                    Click="Cancel_Click" Padding="24,10"/>
+            <Button Content="Tamam" Style="{StaticResource AccentButton}"
+                    Click="OK_Click" Padding="24,10"/>
+        </StackPanel>
+    </Grid>
+</Window>

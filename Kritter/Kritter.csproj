@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\icon.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Kritter</RootNamespace>
+    <AssemblyName>Kritter</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\Kritter Recommended\**\*">
+      <Link>Scripts\Kritter Recommended\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\fr33ty Recommended\**\*" Exclude="..\fr33ty Recommended\README.md">
+      <Link>Scripts\fr33ty Recommended\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="..\icon.png">
+      <Link>Assets\icon.png</Link>
+    </Resource>
+    <Resource Include="..\icon.ico">
+      <Link>Assets\icon.ico</Link>
+    </Resource>
+  </ItemGroup>
+
+</Project>
