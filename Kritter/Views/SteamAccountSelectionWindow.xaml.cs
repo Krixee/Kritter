@@ -1,4 +1,5 @@
 using System.Windows;
+using Kritter.Localization;
 using Kritter.ViewModels;
 
 namespace Kritter.Views;
@@ -16,7 +17,7 @@ public partial class SteamAccountSelectionWindow : Window
     {
         if (ViewModel?.SelectedAccount == null)
         {
-            MessageBox.Show("Lütfen bir Steam hesabı seçin.", "Kritter", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(AppText.SteamAccountRequired, AppText.AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

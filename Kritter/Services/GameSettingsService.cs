@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Kritter.Localization;
 using Kritter.Models;
 using Microsoft.Win32;
 
@@ -93,7 +94,7 @@ public static class GameSettingsService
         return backup.Kind switch
         {
             GameSettingsKind.Cs2 => await RestoreCs2Async(backup),
-            _ => (false, "Desteklenmeyen oyun ayarı türü.")
+            _ => (false, AppText.UnsupportedGameSettingsType)
         };
     }
 
@@ -124,13 +125,13 @@ public static class GameSettingsService
         var sourcePath = backup.EffectiveSourcePath;
         if (string.IsNullOrWhiteSpace(sourcePath) || !Directory.Exists(sourcePath))
         {
-            return (false, "CS2 ayar klasörü paketten çıkarılamadı.");
+            return (false, AppText.Cs2FolderMissingFromPackage);
         }
 
         var steamPath = GetSteamInstallPath();
         if (string.IsNullOrWhiteSpace(steamPath))
         {
-            return (false, "Steam bulunamadı. Lütfen önce Steam'i yükleyip en az bir kez giriş yapın.");
+            return (false, AppText.SteamNotFound);
         }
 
         var userdataRoot = Path.GetFullPath(Path.Combine(steamPath, "userdata"));
@@ -139,13 +140,13 @@ public static class GameSettingsService
         if (!targetPath.StartsWith(userdataRoot, StringComparison.OrdinalIgnoreCase) ||
             !string.Equals(Path.GetFileName(targetPath), "730", StringComparison.OrdinalIgnoreCase))
         {
-            return (false, "CS2 hedef yolu doğrulanamadı.");
+            return (false, AppText.Cs2TargetPathInvalid);
         }
 
         var parentDir = Path.GetDirectoryName(targetPath);
         if (string.IsNullOrWhiteSpace(parentDir))
         {
-            return (false, "CS2 hedef klasörü hazırlanamadı.");
+            return (false, AppText.Cs2TargetFolderInvalid);
         }
 
         Directory.CreateDirectory(parentDir);
@@ -188,7 +189,7 @@ public static class GameSettingsService
             }
             catch
             {
-                // Ignore profile lookup failures; local loginusers.vdf data is enough to continue.
+                // Local loginusers.vdf data is enough to continue.
             }
         });
 

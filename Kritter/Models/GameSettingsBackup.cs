@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json.Serialization;
+using Kritter.Localization;
 
 namespace Kritter.Models;
 
@@ -62,8 +63,8 @@ public class GameSettingsBackup : ViewModels.BaseViewModel
     {
         get
         {
-            var accountLabel = string.IsNullOrWhiteSpace(AccountName) ? "Bilinmeyen hesap" : AccountName;
-            return $"Steam hesabı: {accountLabel} | userdata/{AccountId}";
+            var accountLabel = string.IsNullOrWhiteSpace(AccountName) ? AppText.UnknownAccount : AccountName;
+            return AppText.SteamAccountLabel(accountLabel, AccountId);
         }
     }
 

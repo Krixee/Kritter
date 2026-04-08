@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Kritter.Localization;
 using Kritter.Models;
 
 namespace Kritter.Services;
@@ -18,7 +19,7 @@ public static class SetupInstallerService
         var path = installer.EffectiveFilePath;
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
-            return (false, $"Setup dosyasi bulunamadi: {installer.DisplayName}");
+            return (false, AppText.SetupFileNotFound(installer.DisplayName));
         }
 
         var extension = Path.GetExtension(path).ToLowerInvariant();
@@ -36,7 +37,7 @@ public static class SetupInstallerService
 
         if (extension != ".exe")
         {
-            return (false, $"Desteklenmeyen setup turu: {extension}");
+            return (false, AppText.UnsupportedSetupType(extension));
         }
 
         var argumentsToTry = BuildSilentArgsCandidates(installer.SilentArgs);
@@ -112,7 +113,9 @@ public static class SetupInstallerService
             TryKillProcess(process);
             var timeoutOutput = await outputTask;
             var timeoutError = await errorTask;
-            var timeoutMessage = $"Timeout: setup islemi {ProcessTimeout.TotalMinutes:0} dakikada tamamlanmadi.";
+            var timeoutMessage = Kritter.Localization.AppText.IsTurkish
+                ? $"Timeout: setup işlemi {ProcessTimeout.TotalMinutes:0} dakikada tamamlanmadı."
+                : $"Timeout: setup process did not complete within {ProcessTimeout.TotalMinutes:0} minutes.";
             var timeoutFull = string.IsNullOrWhiteSpace(timeoutError)
                 ? $"{timeoutMessage}\n{timeoutOutput}"
                 : $"{timeoutMessage}\n{timeoutOutput}\n{timeoutError}";

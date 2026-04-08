@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Kritter.Localization;
 using Kritter.Models;
 using Kritter.Services;
 using Microsoft.Win32;
@@ -28,10 +29,17 @@ public class YukleViewModel : BaseViewModel
     public KritterPackage? LoadedPackage
     {
         get => _loadedPackage;
-        set { SetProperty(ref _loadedPackage, value); OnPropertyChanged(nameof(HasPackage)); }
+        set
+        {
+            SetProperty(ref _loadedPackage, value);
+            OnPropertyChanged(nameof(HasPackage));
+            OnPropertyChanged(nameof(PackageStatusSummary));
+        }
     }
 
     public bool HasPackage => _loadedPackage != null;
+    public string PackageStatusSummary => LoadedPackage != null ? AppText.ReadyLabel : AppText.NoPackageLabel;
+    public string ExecutionStateSummary => IsRunning ? AppText.RunningLabel : AppText.IdleLabel;
 
     public string PackageInfo
     {
@@ -42,7 +50,13 @@ public class YukleViewModel : BaseViewModel
     public bool IsRunning
     {
         get => _isRunning;
-        set => SetProperty(ref _isRunning, value);
+        set
+        {
+            if (SetProperty(ref _isRunning, value))
+            {
+                OnPropertyChanged(nameof(ExecutionStateSummary));
+            }
+        }
     }
 
     public bool IsWaitingForRestart
@@ -74,8 +88,8 @@ public class YukleViewModel : BaseViewModel
     {
         var ofd = new OpenFileDialog
         {
-            Filter = "Kritter Paket (*.kritter)|*.kritter",
-            Title = "Kritter Paketi Seç"
+            Filter = AppText.BuildPackageFilter,
+            Title = AppText.SelectPackageTitle
         };
 
         if (ofd.ShowDialog() == true)
@@ -91,7 +105,7 @@ public class YukleViewModel : BaseViewModel
             var pkg = await PackageService.LoadPackageAsync(path);
             if (pkg == null)
             {
-                MessageBox.Show("Paket okunamadı.", "Kritter", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(AppText.PackageReadFailed, AppText.AppName, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -100,9 +114,9 @@ public class YukleViewModel : BaseViewModel
 
             string modeName = pkg.OptimizationMode switch
             {
-                OptimizationMode.KritterRecommended => "Kritter Önerilen",
-                OptimizationMode.Fr33tyAll => "Fr33ty Tüm Optimizasyon",
-                OptimizationMode.KeepCurrent => "Ayarları Koru",
+                OptimizationMode.KritterRecommended => AppText.KritterRecommended,
+                OptimizationMode.Fr33tyAll => AppText.Fr33tyAll,
+                OptimizationMode.KeepCurrent => AppText.KeepCurrent,
                 _ => "?"
             };
 
@@ -112,20 +126,20 @@ public class YukleViewModel : BaseViewModel
             var gameSettingsCount = pkg.GameSettingsBackups.Count;
 
             PackageInfo =
-                $"Mod: {modeName}\n" +
-                $"Uygulama: {pkg.Apps.Count} adet (Winget: {wingetCount}, Direct: {directCount})\n" +
-                $"Setup: {setupCount} adet\n" +
-                $"Oyun ayarı: {gameSettingsCount} adet\n" +
-                $"Oluşturma: {pkg.CreatedAt:g}";
+                $"{AppText.ModeLabel}: {modeName}\n" +
+                $"{AppText.AppsLabel}: {pkg.Apps.Count} {AppText.ItemsSuffix} ({AppText.WingetLabel}: {wingetCount}, {AppText.DirectLabel}: {directCount})\n" +
+                $"{AppText.SetupLabel}: {setupCount} {AppText.ItemsSuffix}\n" +
+                $"{AppText.GameSettingsLabel}: {gameSettingsCount} {AppText.ItemsSuffix}\n" +
+                $"{AppText.CreatedAtLabel}: {pkg.CreatedAt:g}";
 
             if (pkg.OptimizationMode == OptimizationMode.Fr33tyAll && pkg.Fr33tyScripts.Count > 0)
             {
-                PackageInfo += $"\nFr33ty Script: {pkg.Fr33tyScripts.Count} adet";
+                PackageInfo += $"\n{AppText.Fr33tyScriptLabel}: {pkg.Fr33tyScripts.Count} {AppText.ItemsSuffix}";
             }
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Paket yükleme hatası: {ex.Message}", "Kritter", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(AppText.PackageLoadError(ex.Message), AppText.AppName, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -149,7 +163,7 @@ public class YukleViewModel : BaseViewModel
             }
         }
 
-        AddLog("Yeniden başlatma sonrası devam ediliyor...");
+        AddLog(AppText.ResumeAfterRestart);
 
         IsRunning = true;
         try
@@ -158,12 +172,12 @@ public class YukleViewModel : BaseViewModel
             await RestoreGameSettingsPhase();
             await InstallSetupFilesPhase();
             await CleanupPhase();
-            AddLog("");
-            AddLog("Tüm işlemler tamamlandı.");
+            AddLog(string.Empty);
+            AddLog(AppText.AllTasksCompleted);
         }
         catch (Exception ex)
         {
-            AddLog($"HATA: {ex.Message}");
+            AddLog(AppText.ErrorPrefix(ex.Message));
         }
         finally
         {
@@ -192,7 +206,7 @@ public class YukleViewModel : BaseViewModel
             }
             else
             {
-                AddLog("Optimizasyon atlandı (ayarlar korunuyor).");
+                AddLog(AppText.OptimizationSkipped);
             }
 
             if (needsReboot)
@@ -200,9 +214,9 @@ public class YukleViewModel : BaseViewModel
                 var logSnapshot = new List<string>(LogEntries);
                 ResumeService.SetupAutoResume(_packageFilePath!, logSnapshot);
 
-                AddLog("");
-                AddLog("Optimizasyonlar tamamlandı. Bilgisayarınızı yeniden başlatın.");
-                CurrentStepText = "Yeniden başlatma bekleniyor...";
+                AddLog(string.Empty);
+                AddLog(AppText.OptimizationsCompletedRestart);
+                CurrentStepText = AppText.WaitingForRestart;
                 IsRunning = false;
                 IsWaitingForRestart = true;
                 return;
@@ -213,30 +227,32 @@ public class YukleViewModel : BaseViewModel
             await InstallSetupFilesPhase();
             await CleanupPhase();
 
-            AddLog("");
-            AddLog("Tüm işlemler tamamlandı.");
+            AddLog(string.Empty);
+            AddLog(AppText.AllTasksCompleted);
         }
         catch (Exception ex)
         {
-            AddLog($"HATA: {ex.Message}");
+            AddLog(AppText.ErrorPrefix(ex.Message));
         }
         finally
         {
             IsRunning = false;
             if (!IsWaitingForRestart)
+            {
                 CurrentStepText = "";
+            }
         }
     }
 
     private void ExecuteRestart()
     {
-        Process.Start("shutdown", "/r /t 5 /c \"Kritter optimizasyonları uygulandı. Yeniden başlatılıyor...\"");
+        Process.Start("shutdown", $"/r /t 5 /c \"{AppText.RestartShutdownComment}\"");
         Application.Current.Shutdown();
     }
 
     private async Task<bool> OptimizationPhase()
     {
-        AddLog("--- Optimizasyon Aşaması ---");
+        AddLog(AppText.OptimizationPhase);
         bool anyApplied = false;
         var reminderItems = new List<OptimizationScript>();
 
@@ -249,7 +265,7 @@ public class YukleViewModel : BaseViewModel
             for (int i = 0; i < executableScripts.Count; i++)
             {
                 var script = executableScripts[i];
-                var progressText = $"{script.DisplayName} uygulanıyor... %{(int)((double)i / executableScripts.Count * 100)}";
+                var progressText = AppText.ApplyingProgress(script.DisplayName, (int)((double)i / executableScripts.Count * 100));
                 UpdateCurrentStep(progressText);
                 AddLiveLog(progressText);
 
@@ -257,8 +273,8 @@ public class YukleViewModel : BaseViewModel
                 anyApplied = true;
 
                 ReplaceLiveLog(success
-                    ? $"{script.DisplayName} uygulandı."
-                    : $"{script.DisplayName} - uygulanamadı (devam ediliyor).");
+                    ? AppText.Applied(script.DisplayName)
+                    : AppText.ApplyFailedContinue(script.DisplayName));
 
                 await DelayBetweenStepsAsync(i, executableScripts.Count);
             }
@@ -268,7 +284,7 @@ public class YukleViewModel : BaseViewModel
             var packageScripts = LoadedPackage.Fr33tyScripts;
             if (packageScripts.Count == 0)
             {
-                AddLog("Fr33ty script seçilmemiş.");
+                AddLog(AppText.NoFr33tyScriptsSelected);
                 return false;
             }
 
@@ -280,7 +296,7 @@ public class YukleViewModel : BaseViewModel
 
                 if (!File.Exists(fullPath))
                 {
-                    AddLog($"{ps.DisplayName} - dosya bulunamadı, atlanıyor.");
+                    AddLog(AppText.FileMissingSkipped(ps.DisplayName));
                     continue;
                 }
 
@@ -290,10 +306,11 @@ public class YukleViewModel : BaseViewModel
                     RelativePath = ps.RelativePath,
                     DisplayName = ps.DisplayName,
                     FileType = Path.GetExtension(fullPath).ToLowerInvariant() == ".ps1"
-                        ? ScriptFileType.PowerShell : ScriptFileType.Cmd
+                        ? ScriptFileType.PowerShell
+                        : ScriptFileType.Cmd
                 };
 
-                var progressText = $"{script.DisplayName} uygulanıyor... %{(int)((double)i / packageScripts.Count * 100)}";
+                var progressText = AppText.ApplyingProgress(script.DisplayName, (int)((double)i / packageScripts.Count * 100));
                 UpdateCurrentStep(progressText);
                 AddLiveLog(progressText);
 
@@ -301,8 +318,8 @@ public class YukleViewModel : BaseViewModel
                 anyApplied = true;
 
                 ReplaceLiveLog(success
-                    ? $"{script.DisplayName} uygulandı."
-                    : $"{script.DisplayName} - uygulanamadı (devam ediliyor).");
+                    ? AppText.Applied(script.DisplayName)
+                    : AppText.ApplyFailedContinue(script.DisplayName));
 
                 await DelayBetweenStepsAsync(i, packageScripts.Count);
             }
@@ -310,11 +327,11 @@ public class YukleViewModel : BaseViewModel
 
         if (reminderItems.Count > 0)
         {
-            AddLog("");
-            AddLog("--- Hatırlatmalar ---");
+            AddLog(string.Empty);
+            AddLog(AppText.RemindersHeader);
             foreach (var item in reminderItems)
             {
-                AddLog($"  Manuel ayar gerekli: {item.DisplayName}");
+                AddLog(AppText.ManualSettingRequired(item.DisplayName));
             }
         }
 
@@ -325,18 +342,17 @@ public class YukleViewModel : BaseViewModel
     {
         if (LoadedPackage?.Apps == null || LoadedPackage.Apps.Count == 0)
         {
-            AddLog("Yüklenecek uygulama yok.");
+            AddLog(AppText.NoAppsToInstall);
             return;
         }
 
-        AddLog("");
-        AddLog("--- Uygulama Yükleme Aşaması ---");
+        AddLog(string.Empty);
+        AddLog(AppText.AppInstallPhase);
 
         for (int i = 0; i < LoadedPackage.Apps.Count; i++)
         {
             var app = LoadedPackage.Apps[i];
-            var pct = (int)((double)i / LoadedPackage.Apps.Count * 100);
-            var progressText = $"{app.Name} yükleniyor... %{pct}";
+            var progressText = AppText.InstallingProgress(app.Name, (int)((double)i / LoadedPackage.Apps.Count * 100));
             UpdateCurrentStep(progressText);
             AddLiveLog(progressText);
 
@@ -344,18 +360,13 @@ public class YukleViewModel : BaseViewModel
 
             if (success)
             {
-                if (output.Contains("already installed", StringComparison.OrdinalIgnoreCase))
-                {
-                    ReplaceLiveLog($"{app.Name} ({app.MethodLabel}) zaten yüklü.");
-                }
-                else
-                {
-                    ReplaceLiveLog($"{app.Name} ({app.MethodLabel}) yüklendi.");
-                }
+                ReplaceLiveLog(output.Contains("already installed", StringComparison.OrdinalIgnoreCase)
+                    ? AppText.AlreadyInstalled(app.Name, app.MethodLabel)
+                    : AppText.Installed(app.Name, app.MethodLabel));
             }
             else
             {
-                ReplaceLiveLog($"{app.Name} ({app.MethodLabel}) - yüklenemedi.");
+                ReplaceLiveLog(AppText.InstallFailed(app.Name, app.MethodLabel));
             }
 
             await DelayBetweenStepsAsync(i, LoadedPackage.Apps.Count);
@@ -366,29 +377,28 @@ public class YukleViewModel : BaseViewModel
     {
         if (LoadedPackage?.SetupInstallers == null || LoadedPackage.SetupInstallers.Count == 0)
         {
-            AddLog("Setup kurulumu gerekmiyor.");
+            AddLog(AppText.NoSetupInstallNeeded);
             return;
         }
 
-        AddLog("");
-        AddLog("--- Setup Dosyaları Kurulum Aşaması ---");
+        AddLog(string.Empty);
+        AddLog(AppText.SetupInstallPhase);
 
         for (int i = 0; i < LoadedPackage.SetupInstallers.Count; i++)
         {
             var installer = LoadedPackage.SetupInstallers[i];
-            var pct = (int)((double)i / LoadedPackage.SetupInstallers.Count * 100);
-            var progressText = $"{installer.DisplayName} (Setup) kuruluyor... %{pct}";
+            var progressText = AppText.SetupInstallingProgress(installer.DisplayName, (int)((double)i / LoadedPackage.SetupInstallers.Count * 100));
             UpdateCurrentStep(progressText);
             AddLiveLog(progressText);
 
             var (success, output) = await SetupInstallerService.InstallAsync(installer);
             if (success)
             {
-                ReplaceLiveLog($"{installer.DisplayName} (Setup) kuruldu.");
+                ReplaceLiveLog(AppText.SetupInstalled(installer.DisplayName));
             }
             else
             {
-                ReplaceLiveLog($"{installer.DisplayName} (Setup) - kurulamadı.");
+                ReplaceLiveLog(AppText.SetupInstallFailed(installer.DisplayName));
                 if (!string.IsNullOrWhiteSpace(output))
                 {
                     AddLog(output.Trim());
@@ -403,29 +413,28 @@ public class YukleViewModel : BaseViewModel
     {
         if (LoadedPackage?.GameSettingsBackups == null || LoadedPackage.GameSettingsBackups.Count == 0)
         {
-            AddLog("Oyun ayarı geri yükleme gerekmiyor.");
+            AddLog(AppText.NoGameSettingsRestoreNeeded);
             return;
         }
 
-        AddLog("");
-        AddLog("--- Oyun Ayarları Geri Yükleme Aşaması ---");
+        AddLog(string.Empty);
+        AddLog(AppText.GameSettingsRestorePhase);
 
         for (int i = 0; i < LoadedPackage.GameSettingsBackups.Count; i++)
         {
             var backup = LoadedPackage.GameSettingsBackups[i];
-            var pct = (int)((double)i / LoadedPackage.GameSettingsBackups.Count * 100);
-            var progressText = $"{backup.DisplayName} geri yükleniyor... %{pct}";
+            var progressText = AppText.RestoringProgress(backup.DisplayName, (int)((double)i / LoadedPackage.GameSettingsBackups.Count * 100));
             UpdateCurrentStep(progressText);
             AddLiveLog(progressText);
 
             var (success, output) = await GameSettingsService.RestoreAsync(backup);
             if (success)
             {
-                ReplaceLiveLog($"{backup.DisplayName} geri yüklendi.");
+                ReplaceLiveLog(AppText.Restored(backup.DisplayName));
             }
             else
             {
-                ReplaceLiveLog($"{backup.DisplayName} - geri yüklenemedi.");
+                ReplaceLiveLog(AppText.RestoreFailed(backup.DisplayName));
                 if (!string.IsNullOrWhiteSpace(output))
                 {
                     AddLog(output.Trim());
@@ -438,14 +447,14 @@ public class YukleViewModel : BaseViewModel
 
     private async Task CleanupPhase()
     {
-        AddLog("");
-        AddLog("--- Temizlik Aşaması ---");
-        UpdateCurrentStep("Geçici dosyalar temizleniyor...");
-        AddLiveLog("Geçici dosyalar temizleniyor...");
+        AddLog(string.Empty);
+        AddLog(AppText.CleanupPhase);
+        UpdateCurrentStep(AppText.CleaningTemporaryFiles);
+        AddLiveLog(AppText.CleaningTemporaryFiles);
 
         await CleanupService.RunCleanupAsync();
 
-        ReplaceLiveLog("Geçici dosyalar temizlendi.");
+        ReplaceLiveLog(AppText.TemporaryFilesCleaned);
         CurrentStepText = "";
     }
 

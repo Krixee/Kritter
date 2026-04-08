@@ -1,3 +1,5 @@
+using Kritter.Localization;
+
 namespace Kritter.Models;
 
 public class SteamUserAccount
@@ -17,8 +19,8 @@ public class SteamUserAccount
     {
         get
         {
-            var loginName = string.IsNullOrWhiteSpace(AccountName) ? "bilinmiyor" : AccountName;
-            return $"Steam kullanıcı adı: {loginName} | userdata/{AccountId}";
+            var loginName = string.IsNullOrWhiteSpace(AccountName) ? AppText.UnknownUserName : AccountName;
+            return AppText.SteamUserLabel(loginName, AccountId);
         }
     }
 }

@@ -1,6 +1,7 @@
 <UserControl x:Class="Kritter.Views.FormatAtView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:Kritter.Localization"
              xmlns:models="clr-namespace:Kritter.Models"
              Background="Transparent">
 
@@ -16,12 +17,12 @@
 
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Left">
-                            <TextBlock Text="Format At" Style="{StaticResource PageTitleText}"/>
-                            <TextBlock Text="Sistemi tara, uygulamaları seç, setup dosyalarını ekle ve format sonrası tekrar kullanılacak profesyonel bir `.kritter` paketi üret."
+                            <TextBlock Text="{x:Static loc:AppText.FormatPageTitle}" Style="{StaticResource PageTitleText}"/>
+                            <TextBlock Text="{x:Static loc:AppText.FormatPageSubtitle}"
                                        Style="{StaticResource PageSubtitleText}" Margin="0,8,0,0" MaxWidth="700"/>
                         </StackPanel>
 
-                        <Button Content="Sistemi Tara" Style="{StaticResource AccentButton}"
+                        <Button Content="{x:Static loc:AppText.ScanSystem}" Style="{StaticResource AccentButton}"
                                 Command="{Binding ScanCommand}" HorizontalAlignment="Right"
                                 Visibility="{Binding ShowScanButton, Converter={StaticResource BoolToVis}}"/>
                     </DockPanel>
@@ -29,19 +30,19 @@
                     <WrapPanel Grid.Row="1" Margin="0,22,0,4">
                         <Border Style="{StaticResource MetricCard}" Width="180">
                             <StackPanel>
-                                <TextBlock Text="Installed Apps" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                <TextBlock Text="{x:Static loc:AppText.InstalledAppsMetric}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
                                 <TextBlock Text="{Binding InstalledApps.Count}" FontFamily="{StaticResource HeadingFont}" FontSize="28"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource MetricCard}" Width="180">
                             <StackPanel>
-                                <TextBlock Text="Setup Files" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                <TextBlock Text="{x:Static loc:AppText.SetupFilesMetric}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
                                 <TextBlock Text="{Binding SetupInstallers.Count}" FontFamily="{StaticResource HeadingFont}" FontSize="28"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource MetricCard}" Width="180">
                             <StackPanel>
-                                <TextBlock Text="Game Backups" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                <TextBlock Text="{x:Static loc:AppText.GameBackupsMetric}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
                                 <TextBlock Text="{Binding GameSettingsBackups.Count}" FontFamily="{StaticResource HeadingFont}" FontSize="28"/>
                             </StackPanel>
                         </Border>
@@ -55,7 +56,7 @@
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
                                     Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="..." FontSize="18" Margin="0,0,8,0"/>
-                            <TextBlock Text="Sistem taranıyor..." Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{x:Static loc:AppText.ScanningSystem}" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>
@@ -66,19 +67,19 @@
                     <StackPanel>
                         <DockPanel Margin="0,0,0,12">
                             <StackPanel DockPanel.Dock="Left">
-                                <TextBlock Text="Tespit Edilen Uygulamalar" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
-                                <TextBlock Text="Mevcut sistemde bulunan ve yeniden kurulabilecek uygulamalar."
+                                <TextBlock Text="{x:Static loc:AppText.DetectedAppsTitle}" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
+                                <TextBlock Text="{x:Static loc:AppText.DetectedAppsSubtitle}"
                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Content="Tümünü Seç" Style="{StaticResource GhostButton}"
+                                <Button Content="{x:Static loc:AppText.SelectAll}" Style="{StaticResource GhostButton}"
                                         Command="{Binding SelectAllInstalledCommand}" Margin="0,0,8,0"/>
-                                <Button Content="Temizle" Style="{StaticResource GhostButton}"
+                                <Button Content="{x:Static loc:AppText.Clear}" Style="{StaticResource GhostButton}"
                                         Command="{Binding DeselectAllInstalledCommand}"/>
                             </StackPanel>
                         </DockPanel>
 
-                        <TextBlock Text="Tespit edilen uygulama yok."
+                        <TextBlock Text="{x:Static loc:AppText.NoDetectedApps}"
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6"
                                    Visibility="{Binding InstalledApps.Count, Converter={StaticResource CountToVis}, ConverterParameter=Invert}"/>
 
@@ -113,8 +114,8 @@
                 <Border Style="{StaticResource SectionCard}"
                         Visibility="{Binding CommonApps.Count, Converter={StaticResource CountToVis}}">
                     <StackPanel>
-                        <TextBlock Text="Yaygın Uygulamalar" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
-                        <TextBlock Text="Şu anda yüklü olmayan ama pakete eklemek isteyebileceğiniz uygulamalar."
+                        <TextBlock Text="{x:Static loc:AppText.CommonAppsTitle}" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
+                        <TextBlock Text="{x:Static loc:AppText.CommonAppsSubtitle}"
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,14"/>
 
                         <ItemsControl ItemsSource="{Binding CommonApps}">
@@ -141,12 +142,12 @@
 
                 <Border Style="{StaticResource SectionCard}">
                     <StackPanel>
-                        <TextBlock Text="Setup Dosyaları" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
-                        <TextBlock Text="Driver kurulumlarını ayrı tutmak daha güvenli. Klasör seçildiğinde uygun setup dosyaları otomatik tespit edilir."
+                        <TextBlock Text="{x:Static loc:AppText.SetupFilesTitle}" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
+                        <TextBlock Text="{x:Static loc:AppText.SetupFilesSubtitle}"
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,12"/>
 
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <Button Content="Setup klasörü seç" Style="{StaticResource GhostButton}"
+                            <Button Content="{x:Static loc:AppText.SelectSetupFolder}" Style="{StaticResource GhostButton}"
                                     Command="{Binding SelectSetupFolderCommand}"/>
                             <Border Style="{StaticResource InfoPill}" Margin="12,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding SetupFolderPath}" Foreground="{StaticResource TextSecondaryBrush}"
@@ -183,13 +184,13 @@
 
                 <Border Style="{StaticResource SectionCard}">
                     <StackPanel>
-                        <TextBlock Text="Oyun Ayarları" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
-                        <TextBlock Text="Bu sürümde yalnızca CS2 destekleniyor. Steam `userdata` içindeki `730` klasörü seçilen hesap için pakete dahil edilir."
+                        <TextBlock Text="{x:Static loc:AppText.GameSettingsTitle}" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
+                        <TextBlock Text="{x:Static loc:AppText.GameSettingsSubtitle1}"
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,4"/>
-                        <TextBlock Text="Valorant ve League of Legends tarafı şu aşamada kapsam dışında tutuldu; önce net geri yüklenebilen CS2 akışı ürünleştirildi."
+                        <TextBlock Text="{x:Static loc:AppText.GameSettingsSubtitle2}"
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
 
-                        <Button Content="CS2 hesabı seç / değiştir" Style="{StaticResource GhostButton}"
+                        <Button Content="{x:Static loc:AppText.SelectCs2Account}" Style="{StaticResource GhostButton}"
                                 Command="{Binding SelectCs2AccountCommand}" HorizontalAlignment="Left" Margin="0,0,0,12"/>
 
                         <ItemsControl ItemsSource="{Binding GameSettingsBackups}"
@@ -221,30 +222,30 @@
 
                 <Border Style="{StaticResource SectionCard}">
                     <StackPanel>
-                        <TextBlock Text="Optimizasyon Modu" FontFamily="{StaticResource HeadingFont}" FontSize="18" Margin="0,0,0,12"/>
+                        <TextBlock Text="{x:Static loc:AppText.OptimizationModeTitle}" FontFamily="{StaticResource HeadingFont}" FontSize="18" Margin="0,0,0,12"/>
 
                         <RadioButton Style="{StaticResource OptionRadio}" GroupName="OptMode"
-                                     Content="Kritter Önerilen"
+                                     Content="{x:Static loc:AppText.KritterRecommended}"
                                      IsChecked="{Binding SelectedMode, Converter={StaticResource EnumToBool}, ConverterParameter=KritterRecommended}"/>
 
                         <DockPanel Margin="0,6">
                             <RadioButton Style="{StaticResource OptionRadio}" GroupName="OptMode"
-                                         Content="Fr33ty Tüm Optimizasyon" DockPanel.Dock="Left"
+                                         Content="{x:Static loc:AppText.Fr33tyAll}" DockPanel.Dock="Left"
                                          IsChecked="{Binding SelectedMode, Converter={StaticResource EnumToBool}, ConverterParameter=Fr33tyAll}"/>
                         </DockPanel>
 
-                        <Button Content="Scriptleri Seç..." Style="{StaticResource GhostButton}"
+                        <Button Content="{x:Static loc:AppText.SelectScripts}" Style="{StaticResource GhostButton}"
                                 Command="{Binding ShowFr33tyModalCommand}" HorizontalAlignment="Left"
                                 Margin="30,0,0,6"
                                 Visibility="{Binding IsFr33tyMode, Converter={StaticResource BoolToVis}}"/>
 
                         <RadioButton Style="{StaticResource OptionRadio}" GroupName="OptMode"
-                                     Content="Şu anki ayarları koru"
+                                     Content="{x:Static loc:AppText.KeepCurrent}"
                                      IsChecked="{Binding SelectedMode, Converter={StaticResource EnumToBool}, ConverterParameter=KeepCurrent}"/>
                     </StackPanel>
                 </Border>
 
-                <Button Content="Paketi Oluştur" Style="{StaticResource AccentButton}"
+                <Button Content="{x:Static loc:AppText.CreatePackage}" Style="{StaticResource AccentButton}"
                         Command="{Binding CreatePackageCommand}" HorizontalAlignment="Left"
                         Margin="0,4,0,26" FontSize="15" Padding="34,14"/>
             </StackPanel>

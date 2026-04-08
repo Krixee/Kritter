@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Kritter.Localization;
 using Kritter.Models;
 using Kritter.Services;
 
@@ -47,6 +48,8 @@ public class OptimizasyonViewModel : BaseViewModel
         set => SetProperty(ref _currentStepText, value);
     }
 
+    public string SelectedFr33tyScriptsSummary => AppText.Fr33tyScriptCountLabel(SelectedFr33tyScripts.Count);
+
     public OptimizationMode SelectedMode
     {
         get => _selectedMode;
@@ -77,6 +80,7 @@ public class OptimizasyonViewModel : BaseViewModel
         SelectAllCommand = new RelayCommand(() => { foreach (var s in KritterScripts) s.IsSelected = true; });
         DeselectAllCommand = new RelayCommand(() => { foreach (var s in KritterScripts) s.IsSelected = false; });
         ShowFr33tyModalCommand = new RelayCommand(ShowFr33tyModal);
+        SelectedFr33tyScripts.CollectionChanged += (_, _) => OnPropertyChanged(nameof(SelectedFr33tyScriptsSummary));
 
         LoadScripts();
     }
@@ -96,13 +100,14 @@ public class OptimizasyonViewModel : BaseViewModel
                 {
                     KritterScripts.Add(s);
                 }
+
                 StatusText = KritterScripts.Count > 0
-                    ? $"{KritterScripts.Count} Kritter optimizasyon scripti bulundu."
-                    : "Kritter scripti bulunamadı.";
+                    ? AppText.KritterScriptsFound(KritterScripts.Count)
+                    : AppText.KritterScriptsNotFound;
             }
             catch (Exception ex)
             {
-                StatusText = $"Script yükleme hatası: {ex.Message}";
+                StatusText = AppText.ScriptLoadError(ex.Message);
             }
             finally
             {
@@ -111,7 +116,7 @@ public class OptimizasyonViewModel : BaseViewModel
         }
         else if (_selectedMode == OptimizationMode.Fr33tyAll)
         {
-            StatusText = "Fr33ty scriptlerini seçmek için \"Scriptleri Seç\" butonunu kullanın.";
+            StatusText = AppText.Fr33tySelectionPrompt;
         }
     }
 
@@ -128,7 +133,8 @@ public class OptimizasyonViewModel : BaseViewModel
             {
                 SelectedFr33tyScripts.Add(s);
             }
-            StatusText = $"{SelectedFr33tyScripts.Count} Fr33ty script seçildi.";
+
+            StatusText = AppText.Fr33tyScriptCountLabel(SelectedFr33tyScripts.Count);
         }
     }
 
@@ -136,19 +142,19 @@ public class OptimizasyonViewModel : BaseViewModel
     {
         if (_selectedMode == OptimizationMode.KritterRecommended && KritterScripts.All(s => !s.IsSelected))
         {
-            MessageBox.Show("Lütfen en az bir script seçin.", "Kritter", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(AppText.SelectAtLeastOneScript, AppText.AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (_selectedMode == OptimizationMode.Fr33tyAll && SelectedFr33tyScripts.Count == 0)
         {
-            MessageBox.Show("Lütfen Fr33ty scriptlerini seçin.", "Kritter", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(AppText.SelectFr33tyScripts, AppText.AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         IsRunning = true;
         LogEntries.Clear();
-        AddLog("--- Optimizasyon Başlatıldı ---");
+        AddLog(AppText.OptimizationStarted);
 
         try
         {
@@ -161,14 +167,14 @@ public class OptimizasyonViewModel : BaseViewModel
                 await ApplyFr33tyScriptsAsync();
             }
 
-            AddLog("");
-            AddLog("Tüm optimizasyonlar tamamlandı.");
-            StatusText = "Optimizasyonlar başarıyla uygulandı.";
+            AddLog(string.Empty);
+            AddLog(AppText.AllOptimizationsCompleted);
+            StatusText = AppText.OptimizationsAppliedSuccessfully;
         }
         catch (Exception ex)
         {
-            AddLog($"HATA: {ex.Message}");
-            StatusText = "Optimizasyon sırasında hata oluştu.";
+            AddLog(AppText.ErrorPrefix(ex.Message));
+            StatusText = AppText.OptimizationFailed;
         }
         finally
         {
@@ -185,18 +191,20 @@ public class OptimizasyonViewModel : BaseViewModel
         {
             var script = selected[i];
             var pct = (int)((double)i / selected.Count * 100);
-            var progressText = $"{script.DisplayName} uygulanıyor... %{pct}";
+            var progressText = AppText.ApplyingProgress(script.DisplayName, pct);
             UpdateCurrentStep(progressText);
             AddLiveLog(progressText);
 
             var (success, _) = await ScriptService.ExecuteKritterScript(script, optimizeMode: true);
 
             ReplaceLiveLog(success
-                ? $"{script.DisplayName} uygulandı."
-                : $"{script.DisplayName} - uygulanamadı (devam ediliyor).");
+                ? AppText.Applied(script.DisplayName)
+                : AppText.ApplyFailedContinue(script.DisplayName));
 
             if (i < selected.Count - 1)
+            {
                 await Task.Delay(TimeSpan.FromSeconds(3));
+            }
         }
     }
 
@@ -211,7 +219,7 @@ public class OptimizasyonViewModel : BaseViewModel
 
             if (!File.Exists(fullPath))
             {
-                AddLog($"{ps.DisplayName} - dosya bulunamadı, atlanıyor.");
+                AddLog(AppText.FileMissingSkipped(ps.DisplayName));
                 continue;
             }
 
@@ -221,22 +229,25 @@ public class OptimizasyonViewModel : BaseViewModel
                 RelativePath = ps.RelativePath,
                 DisplayName = ps.DisplayName,
                 FileType = Path.GetExtension(fullPath).ToLowerInvariant() == ".ps1"
-                    ? ScriptFileType.PowerShell : ScriptFileType.Cmd
+                    ? ScriptFileType.PowerShell
+                    : ScriptFileType.Cmd
             };
 
             var pct = (int)((double)i / SelectedFr33tyScripts.Count * 100);
-            var progressText = $"{script.DisplayName} uygulanıyor... %{pct}";
+            var progressText = AppText.ApplyingProgress(script.DisplayName, pct);
             UpdateCurrentStep(progressText);
             AddLiveLog(progressText);
 
             var (success, _) = await ScriptService.ExecuteScriptAsync(script, 1);
 
             ReplaceLiveLog(success
-                ? $"{script.DisplayName} uygulandı."
-                : $"{script.DisplayName} - uygulanamadı (devam ediliyor).");
+                ? AppText.Applied(script.DisplayName)
+                : AppText.ApplyFailedContinue(script.DisplayName));
 
             if (i < SelectedFr33tyScripts.Count - 1)
+            {
                 await Task.Delay(TimeSpan.FromSeconds(3));
+            }
         }
     }
 
@@ -268,6 +279,7 @@ public class OptimizasyonViewModel : BaseViewModel
             {
                 LogEntries[_liveLogIndex] = text;
             }
+
             _liveLogIndex = -1;
         });
     }

@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Kritter.Localization;
 using Kritter.Models;
 using Kritter.Services;
 using Microsoft.Win32;
@@ -92,7 +93,7 @@ public class FormatAtViewModel : BaseViewModel
     private async Task ScanAsync()
     {
         IsScanning = true;
-        StatusText = "Sistem taranıyor...";
+        StatusText = AppText.ScanStatus;
         InstalledApps.Clear();
         CommonApps.Clear();
 
@@ -112,13 +113,13 @@ public class FormatAtViewModel : BaseViewModel
             }
 
             StatusText = InstalledApps.Count == 0
-                ? "Yeniden kurulabilir uygulama bulunamadı."
-                : $"{InstalledApps.Count} yeniden kurulabilir uygulama tespit edildi";
+                ? AppText.NoReinstallableAppsFound
+                : AppText.ReinstallableAppsDetected(InstalledApps.Count);
             ScanComplete = true;
         }
         catch (Exception ex)
         {
-            StatusText = $"Tarama hatası: {ex.Message}";
+            StatusText = AppText.ScanError(ex.Message);
         }
         finally
         {
@@ -129,14 +130,14 @@ public class FormatAtViewModel : BaseViewModel
     private async Task SelectSetupFolderAsync()
     {
         MessageBox.Show(
-            "Driver'ları manuel kurmanız önerilir. Lütfen seçtiğiniz klasörde driver kurulum dosyaları varsa çıkarın.",
-            "Setup Klasörü Uyarısı",
+            AppText.SetupFolderWarningMessage,
+            AppText.SetupFolderWarningTitle,
             MessageBoxButton.OK,
             MessageBoxImage.Warning);
 
         using var dialog = new WinForms.FolderBrowserDialog
         {
-            Description = "Setup dosyalarının olduğu klasörü seçin.",
+            Description = AppText.SetupFolderDialogDescription,
             UseDescriptionForTitle = true,
             ShowNewFolderButton = false
         };
@@ -156,8 +157,8 @@ public class FormatAtViewModel : BaseViewModel
         }
 
         StatusText = detected.Count == 0
-            ? "Seçilen klasörde uygun setup dosyası bulunamadı."
-            : $"{detected.Count} setup dosyası bulundu ve pakete eklenebilir.";
+            ? AppText.NoSetupFilesFound
+            : AppText.SetupFilesDetected(detected.Count);
     }
 
     private async Task CreatePackageAsync()
@@ -178,7 +179,7 @@ public class FormatAtViewModel : BaseViewModel
 
         if (selectedApps.Count == 0 && selectedSetupInstallers.Count == 0 && selectedGameSettings.Count == 0)
         {
-            MessageBox.Show("Lütfen en az bir uygulama, setup dosyası veya oyun ayarı seçin.", "Kritter", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(AppText.SelectAtLeastOnePackageItem, AppText.AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -208,7 +209,7 @@ public class FormatAtViewModel : BaseViewModel
 
         var sfd = new SaveFileDialog
         {
-            Filter = "Kritter Paket (*.kritter)|*.kritter",
+            Filter = AppText.BuildPackageFilter,
             FileName = System.IO.Path.GetFileName(defaultPath),
             InitialDirectory = System.IO.Path.GetDirectoryName(defaultPath) ?? ""
         };
@@ -218,13 +219,13 @@ public class FormatAtViewModel : BaseViewModel
             try
             {
                 await PackageService.SavePackageAsync(sfd.FileName, package);
-                StatusText = $"Paket oluşturuldu: {System.IO.Path.GetFileName(sfd.FileName)}";
-                MessageBox.Show($"Paket başarıyla oluşturuldu!\n\n{sfd.FileName}", "Kritter",
+                StatusText = AppText.PackageCreatedStatus(System.IO.Path.GetFileName(sfd.FileName));
+                MessageBox.Show(AppText.PackageCreatedMessage(sfd.FileName), AppText.AppName,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Paket oluşturma hatası: {ex.Message}", "Kritter",
+                MessageBox.Show(AppText.PackageCreateError(ex.Message), AppText.AppName,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -234,7 +235,7 @@ public class FormatAtViewModel : BaseViewModel
 
     private async Task SelectCs2AccountAsync()
     {
-        StatusText = "Steam/CS2 hesapları aranıyor...";
+        StatusText = AppText.SearchingSteamAccounts;
 
         try
         {
@@ -242,11 +243,11 @@ public class FormatAtViewModel : BaseViewModel
             if (accounts.Count == 0)
             {
                 MessageBox.Show(
-                    "Steam `userdata` içinde 730 klasörü bulunan bir hesap bulunamadı.",
-                    "Kritter",
+                    AppText.NoCs2AccountsMessage,
+                    AppText.AppName,
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
-                StatusText = "CS2 hesabı bulunamadı.";
+                StatusText = AppText.NoCs2AccountsStatus;
                 return;
             }
 
@@ -259,19 +260,19 @@ public class FormatAtViewModel : BaseViewModel
 
             if (modal.ShowDialog() != true || vm.SelectedAccount == null)
             {
-                StatusText = "CS2 hesap seçimi iptal edildi.";
+                StatusText = AppText.Cs2SelectionCancelled;
                 return;
             }
 
             GameSettingsBackups.Clear();
             GameSettingsBackups.Add(GameSettingsService.CreateCs2Backup(vm.SelectedAccount));
 
-            StatusText = $"CS2 hesabı seçildi: {vm.SelectedAccount.DisplayName}";
+            StatusText = AppText.Cs2Selected(vm.SelectedAccount.DisplayName);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"CS2 hesapları okunamadı: {ex.Message}", "Kritter", MessageBoxButton.OK, MessageBoxImage.Error);
-            StatusText = "CS2 hesap taraması başarısız oldu.";
+            MessageBox.Show(AppText.Cs2ReadError(ex.Message), AppText.AppName, MessageBoxButton.OK, MessageBoxImage.Error);
+            StatusText = AppText.Cs2ScanFailed;
         }
     }
 
@@ -283,7 +284,7 @@ public class FormatAtViewModel : BaseViewModel
         if (modal.ShowDialog() == true)
         {
             _selectedFr33tyScripts = vm.GetSelectedScripts();
-            StatusText = $"{_selectedFr33tyScripts.Count} Fr33ty script seçildi";
+            StatusText = AppText.Fr33tyScriptCountLabel(_selectedFr33tyScripts.Count);
         }
     }
 }

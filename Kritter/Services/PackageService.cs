@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Kritter.Localization;
 using Kritter.Models;
 
 namespace Kritter.Services;
@@ -116,7 +117,7 @@ public static class PackageService
             var sourcePath = installer.EffectiveFilePath;
             if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
             {
-                throw new FileNotFoundException($"Setup dosyasi bulunamadi: {installer.DisplayName}", sourcePath);
+                throw new FileNotFoundException(AppText.SetupFileNotFound(installer.DisplayName), sourcePath);
             }
 
             var sourceExtension = Path.GetExtension(sourcePath);
@@ -143,7 +144,7 @@ public static class PackageService
             var sourcePath = backup.EffectiveSourcePath;
             if (string.IsNullOrWhiteSpace(sourcePath) || !Directory.Exists(sourcePath))
             {
-                throw new DirectoryNotFoundException($"Oyun ayari klasoru bulunamadi: {backup.DisplayName}");
+                throw new DirectoryNotFoundException(AppText.SetupFolderNotFound(backup.DisplayName));
             }
 
             var folderName = MakeSafeFileName($"{backup.Kind}_{backup.AccountId}_{backup.GameName}");

@@ -1,8 +1,9 @@
 <Window x:Class="Kritter.Views.SteamAccountSelectionWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:Kritter.Localization"
         xmlns:models="clr-namespace:Kritter.Models"
-        Title="CS2 Hesap Seçimi" Width="680" Height="520"
+        Title="{x:Static loc:AppText.SteamAccountWindowTitle}" Width="680" Height="520"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource BgBrush}"
         ResizeMode="CanResizeWithGrip">
@@ -15,8 +16,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Counter-Strike 2 Steam Hesabı" FontSize="18" FontWeight="Bold"/>
-            <TextBlock Text="`userdata` içinde 730 klasörü bulunan hesabı seçin. Seçilen hesabın CS2 ayarları `.kritter` paketine eklenecek."
+            <TextBlock Text="{x:Static loc:AppText.SteamAccountHeading}" FontSize="18" FontWeight="Bold"/>
+            <TextBlock Text="{x:Static loc:AppText.SteamAccountSubtitle}"
                        Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
         </StackPanel>
 
@@ -53,7 +54,7 @@
                                     Background="{StaticResource PanelBrush}" CornerRadius="6"
                                     VerticalAlignment="Top"
                                     Visibility="{Binding IsMostRecent, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Son kullanılan" FontSize="11" Foreground="{StaticResource AccentBrush}"/>
+                                <TextBlock Text="{x:Static loc:AppText.MostRecent}" FontSize="11" Foreground="{StaticResource AccentBrush}"/>
                             </Border>
                         </Grid>
                     </Border>
@@ -62,9 +63,9 @@
         </ListBox>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
-            <Button Content="İptal" Style="{StaticResource GhostButton}" Margin="0,0,8,0"
+            <Button Content="{x:Static loc:AppText.Cancel}" Style="{StaticResource GhostButton}" Margin="0,0,8,0"
                     Click="Cancel_Click" Padding="24,10"/>
-            <Button Content="Hesabı Kullan" Style="{StaticResource AccentButton}"
+            <Button Content="{x:Static loc:AppText.UseAccount}" Style="{StaticResource AccentButton}"
                     Click="OK_Click" Padding="24,10"/>
         </StackPanel>
     </Grid>
