@@ -66,6 +66,41 @@ public static class WingetService
         "x64", "x86", "64 bit", "32 bit", "64bit", "32bit", "machine wide", "launcher", "helper"
     };
 
+    private static readonly string[] ExcludedNameFragments =
+    {
+        "windows app runtime",
+        "gameinput",
+        "gaming services",
+        "edge webview",
+        "webview2 runtime",
+        "update health tools",
+        "visual c",
+        "redistributable",
+        "desktop runtime",
+        "asp net core runtime",
+        "shared framework",
+        "dotnet runtime",
+        "microsoft edge",
+        "app installer"
+    };
+
+    private static readonly string[] ExcludedIdPrefixes =
+    {
+        "microsoft.windowsappruntime",
+        "microsoft.gameinput",
+        "microsoft.gamingservices",
+        "microsoft.edgewebview2runtime",
+        "microsoft.edge",
+        "microsoft.vcredist",
+        "microsoft.dotnet",
+        "microsoft.aspnetcore",
+        "microsoft.vclibs",
+        "microsoft.ui.xaml",
+        "microsoft.desktopappinstaller",
+        "msix microsoft.vclibs",
+        "msix microsoft.microsoftedge"
+    };
+
     private static readonly List<ReinstallDefinition> ReinstallDefinitions = new()
     {
         new ReinstallDefinition(
@@ -611,6 +646,11 @@ public static class WingetService
                         continue;
                     }
 
+                    if (ShouldExcludeInstalledApp(displayName, subKeyName, publisher, installLocation, uninstallString))
+                    {
+                        continue;
+                    }
+
                     var searchBlob = NormalizeText($"{displayName} {publisher} {installLocation} {uninstallString}");
 
                     target.Add(new RegistryInstalledApp
@@ -735,6 +775,11 @@ public static class WingetService
                 continue;
             }
 
+            if (ShouldExcludeInstalledApp(item.Name, item.Id, publisher: null))
+            {
+                continue;
+            }
+
             result.Add(new WingetApp
             {
                 Id = item.Id,
@@ -846,6 +891,70 @@ public static class WingetService
         var cleaned = VersionRegex.Replace(input, " ");
         cleaned = Regex.Replace(cleaned, @"\s+", " ").Trim();
         return cleaned;
+    }
+
+    private static bool ShouldExcludeInstalledApp(
+        string? name,
+        string? idOrKey,
+        string? publisher,
+        string? installLocation = null,
+        string? uninstallString = null)
+    {
+        var normalizedName = NormalizeText(name);
+        var normalizedId = NormalizeText(idOrKey);
+        var normalizedPublisher = NormalizeText(publisher);
+        var normalizedLocation = NormalizeText(installLocation);
+        var normalizedUninstall = NormalizeText(uninstallString);
+
+        if (string.IsNullOrWhiteSpace(normalizedName) && string.IsNullOrWhiteSpace(normalizedId))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(idOrKey) && FindDefinitionByWingetId(idOrKey) != null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(name) && FindDefinitionByText(name) != null)
+        {
+            return false;
+        }
+
+        if (ExcludedIdPrefixes.Any(prefix =>
+                normalizedId.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        if (ExcludedNameFragments.Any(fragment =>
+                normalizedName.Contains(fragment, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        if (normalizedPublisher.Contains("microsoft", StringComparison.OrdinalIgnoreCase) &&
+            (normalizedName.Contains("runtime", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("framework", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("redistributable", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("webview", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("gameinput", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        if (normalizedLocation.Contains("windowsapps", StringComparison.OrdinalIgnoreCase) &&
+            normalizedPublisher.Contains("microsoft", StringComparison.OrdinalIgnoreCase) &&
+            (normalizedName.Contains("runtime", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("framework", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("webview", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        return normalizedUninstall.Contains("windowsappruntime", StringComparison.OrdinalIgnoreCase) ||
+               normalizedUninstall.Contains("gameinput", StringComparison.OrdinalIgnoreCase) ||
+               normalizedUninstall.Contains("webview", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizeText(string? input)
