@@ -11,6 +11,9 @@
                     <TextBlock Text="{x:Static loc:AppText.InfoPageTitle}" Style="{StaticResource PageTitleText}"/>
                     <TextBlock Text="{x:Static loc:AppText.InfoPageSubtitle}"
                                Style="{StaticResource PageSubtitleText}" Margin="0,8,0,0"/>
+                    <TextBlock Text="{x:Static loc:AppText.InfoVersionBody}"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,12,0,0"/>
                 </StackPanel>
             </Border>
 

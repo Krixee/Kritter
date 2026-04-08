@@ -35,7 +35,7 @@ Yes, with a few conditions.
 
 ### SmartScreen And Smart App Control
 
-- The current public `Kritter-v2.0.0.exe` is unsigned.
+- The current public `Kritter-v2.3.0.exe` is unsigned.
 - Because of that, Windows SmartScreen or Smart App Control can warn users with messages like "Windows protected your PC".
 - There is no project-only flag that safely removes that warning for other people.
 - The real fix is signing the release with a publicly trusted code-signing identity and building reputation over time.
@@ -58,18 +58,19 @@ dotnet build Kritter.sln
 ### Publish
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.0.0
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.3.0
 ```
 
 ### Sign A Release
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.0.0 -SigningThumbprint "<CERT_THUMBPRINT>" -TimestampServer "<TIMESTAMP_URL>"
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.3.0 -SigningThumbprint "<CERT_THUMBPRINT>" -TimestampServer "<TIMESTAMP_URL>"
 ```
 
 ### Notes
 
 - The app UI switches automatically: Turkish on `tr` systems, English on non-`tr` systems.
+- The scan excludes common Windows runtimes, frameworks, SDKs, and system helper packages such as Windows App Runtime, .NET SDK, UI Xaml, VCLibs, PhysX, and chipset helper entries.
 - CS2 account selection uses local Steam data and, when available, public Steam profile XML data for avatar and profile confirmation.
 - Valorant and League of Legends are not packaged in this release because Riot documents a mixed local and server-side settings flow.
 - Optimization scripts modify Windows settings. Creating a restore point first is recommended.
@@ -109,7 +110,7 @@ Evet, ama birkaç şart var.
 
 ### SmartScreen ve Smart App Control
 
-- Şu anki public `Kritter-v2.0.0.exe` imzasızdır.
+- Şu anki public `Kritter-v2.3.0.exe` imzasızdır.
 - Bu yüzden Windows SmartScreen veya Smart App Control indiren kullanıcıya "Windows bilgisayarınızı korudu" benzeri uyarılar gösterebilir.
 - Bu uyarıyı başka kullanıcılar için güvenli biçimde kapatan bir proje ayarı yoktur.
 - Gerçek çözüm, release dosyasını public trust code-signing kimliğiyle imzalamak ve zamanla itibar kazanmaktır.
@@ -132,18 +133,19 @@ dotnet build Kritter.sln
 ### Yayın Alma
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.0.0
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.3.0
 ```
 
 ### İmzalı Release Alma
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.0.0 -SigningThumbprint "<SERTIFIKA_THUMBPRINT>" -TimestampServer "<TIMESTAMP_URL>"
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.3.0 -SigningThumbprint "<SERTIFIKA_THUMBPRINT>" -TimestampServer "<TIMESTAMP_URL>"
 ```
 
 ### Notlar
 
 - Uygulama arayüzü otomatik dil seçer: sistem dili `tr` ise Türkçe, diğer dillerde İngilizce açılır.
+- Tarama akışı artık Windows App Runtime, .NET SDK, UI Xaml, VCLibs, PhysX ve benzeri sistem/runtime bileşenlerini dışarıda bırakır.
 - CS2 hesap seçimi için yerel Steam verisi ve erişilebildiğinde public Steam profil XML verisi kullanılır.
 - Valorant ve League of Legends bu sürümde pakete eklenmedi; Riot tarafında hem yerel hem sunucu tabanlı ayar akışı dokümante edildiği için kapsam şimdilik CS2 ile sınırlı.
 - Optimizasyon scriptleri Windows ayarlarını değiştirir. Öncesinde geri yükleme noktası oluşturmak önerilir.

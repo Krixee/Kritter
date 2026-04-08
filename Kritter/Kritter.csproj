@@ -10,9 +10,9 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Kritter</RootNamespace>
     <AssemblyName>Kritter</AssemblyName>
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.3.0</Version>
+    <AssemblyVersion>2.3.0.0</AssemblyVersion>
+    <FileVersion>2.3.0.0</FileVersion>
     <Company>Krixe</Company>
     <Product>Kritter</Product>
     <Authors>Krixe</Authors>

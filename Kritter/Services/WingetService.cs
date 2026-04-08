@@ -80,25 +80,33 @@ public static class WingetService
         "asp net core runtime",
         "shared framework",
         "dotnet runtime",
+        "dotnet sdk",
+        "ui xaml",
+        "physx",
+        "chipset",
+        "inno setup",
+        "installer runtime",
         "microsoft edge",
         "app installer"
     };
 
     private static readonly string[] ExcludedIdPrefixes =
     {
-        "microsoft.windowsappruntime",
-        "microsoft.gameinput",
-        "microsoft.gamingservices",
-        "microsoft.edgewebview2runtime",
-        "microsoft.edge",
-        "microsoft.vcredist",
-        "microsoft.dotnet",
-        "microsoft.aspnetcore",
-        "microsoft.vclibs",
-        "microsoft.ui.xaml",
-        "microsoft.desktopappinstaller",
-        "msix microsoft.vclibs",
-        "msix microsoft.microsoftedge"
+        "microsoft windowsappruntime",
+        "microsoft gameinput",
+        "microsoft gamingservices",
+        "microsoft edgewebview2runtime",
+        "microsoft edge",
+        "microsoft vcredist",
+        "microsoft dotnet",
+        "microsoft dotnet sdk",
+        "microsoft aspnetcore",
+        "microsoft vclibs",
+        "microsoft ui xaml",
+        "microsoft desktopappinstaller",
+        "nvidia physx",
+        "msix microsoft vclibs",
+        "msix microsoft microsoftedge"
     };
 
     private static readonly List<ReinstallDefinition> ReinstallDefinitions = new()
@@ -900,6 +908,7 @@ public static class WingetService
         string? installLocation = null,
         string? uninstallString = null)
     {
+        var lowerRawId = idOrKey?.Trim().ToLowerInvariant() ?? string.Empty;
         var normalizedName = NormalizeText(name);
         var normalizedId = NormalizeText(idOrKey);
         var normalizedPublisher = NormalizeText(publisher);
@@ -927,6 +936,19 @@ public static class WingetService
             return true;
         }
 
+        if (lowerRawId.StartsWith("microsoft.windowsappruntime", StringComparison.OrdinalIgnoreCase) ||
+            lowerRawId.StartsWith("microsoft.gameinput", StringComparison.OrdinalIgnoreCase) ||
+            lowerRawId.StartsWith("microsoft.gamingservices", StringComparison.OrdinalIgnoreCase) ||
+            lowerRawId.StartsWith("microsoft.edgewebview2runtime", StringComparison.OrdinalIgnoreCase) ||
+            lowerRawId.StartsWith("microsoft.dotnet", StringComparison.OrdinalIgnoreCase) ||
+            lowerRawId.StartsWith("microsoft.ui.xaml", StringComparison.OrdinalIgnoreCase) ||
+            lowerRawId.StartsWith("microsoft.vclibs", StringComparison.OrdinalIgnoreCase) ||
+            lowerRawId.StartsWith("microsoft.desktopappinstaller", StringComparison.OrdinalIgnoreCase) ||
+            lowerRawId.StartsWith("nvidia.physx", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
         if (ExcludedNameFragments.Any(fragment =>
                 normalizedName.Contains(fragment, StringComparison.OrdinalIgnoreCase)))
         {
@@ -935,10 +957,26 @@ public static class WingetService
 
         if (normalizedPublisher.Contains("microsoft", StringComparison.OrdinalIgnoreCase) &&
             (normalizedName.Contains("runtime", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("sdk", StringComparison.OrdinalIgnoreCase) ||
              normalizedName.Contains("framework", StringComparison.OrdinalIgnoreCase) ||
              normalizedName.Contains("redistributable", StringComparison.OrdinalIgnoreCase) ||
              normalizedName.Contains("webview", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("xaml", StringComparison.OrdinalIgnoreCase) ||
              normalizedName.Contains("gameinput", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        if ((normalizedPublisher.Contains("advanced micro devices", StringComparison.OrdinalIgnoreCase) ||
+             normalizedPublisher.Equals("amd", StringComparison.OrdinalIgnoreCase) ||
+             normalizedPublisher.Contains("amd", StringComparison.OrdinalIgnoreCase)) &&
+            normalizedName.Contains("chipset", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (normalizedPublisher.Contains("nvidia", StringComparison.OrdinalIgnoreCase) &&
+            normalizedName.Contains("physx", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -946,7 +984,9 @@ public static class WingetService
         if (normalizedLocation.Contains("windowsapps", StringComparison.OrdinalIgnoreCase) &&
             normalizedPublisher.Contains("microsoft", StringComparison.OrdinalIgnoreCase) &&
             (normalizedName.Contains("runtime", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("sdk", StringComparison.OrdinalIgnoreCase) ||
              normalizedName.Contains("framework", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("xaml", StringComparison.OrdinalIgnoreCase) ||
              normalizedName.Contains("webview", StringComparison.OrdinalIgnoreCase)))
         {
             return true;
@@ -954,7 +994,12 @@ public static class WingetService
 
         return normalizedUninstall.Contains("windowsappruntime", StringComparison.OrdinalIgnoreCase) ||
                normalizedUninstall.Contains("gameinput", StringComparison.OrdinalIgnoreCase) ||
-               normalizedUninstall.Contains("webview", StringComparison.OrdinalIgnoreCase);
+               normalizedUninstall.Contains("webview", StringComparison.OrdinalIgnoreCase) ||
+               normalizedUninstall.Contains("dotnet", StringComparison.OrdinalIgnoreCase) ||
+               normalizedUninstall.Contains("xaml", StringComparison.OrdinalIgnoreCase) ||
+               normalizedUninstall.Contains("physx", StringComparison.OrdinalIgnoreCase) ||
+               normalizedUninstall.Contains("chipset", StringComparison.OrdinalIgnoreCase) ||
+               normalizedUninstall.Contains("inno setup", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizeText(string? input)

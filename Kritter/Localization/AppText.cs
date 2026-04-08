@@ -9,6 +9,7 @@ public static class AppText
     private static string Pick(string tr, string en) => IsTurkish ? tr : en;
 
     public static string AppName => "Kritter";
+    public static string AppVersion => "v2.3";
     public static string WindowSubtitle => Pick("Format sonrası kurulum, geri yükleme ve optimizasyon konsolu", "Post-format setup, restore, and optimization console");
 
     public static string NavFormatAt => Pick("Format At", "Build Package");
@@ -78,6 +79,7 @@ public static class AppText
 
     public static string InfoPageTitle => Pick("Bilgi", "Info");
     public static string InfoPageSubtitle => Pick("Kritter'in ne yaptığını, nasıl çalıştığını ve hangi akışları birleştirdiğini tek yerde özetler.", "A single place that explains what Kritter does, how it works, and which workflows it brings together.");
+    public static string InfoVersionBody => Pick($"Geçerli uygulama sürümü: {AppVersion}", $"Current application version: {AppVersion}");
     public static string InfoCard1Title => Pick("Nasıl Çalışır", "How It Works");
     public static string InfoCard1Body => Pick("Önce mevcut sistemi tarar, ardından seçtiğiniz uygulamaları, yerel setup dosyalarını ve desteklenen oyun ayarlarını `.kritter` paketine yazar. Format sonrası bu paket tekrar okunup kurulum akışı çalıştırılır.", "It first scans the current machine, then writes your selected applications, local setup files, and supported game settings into a `.kritter` package. After a fresh install, that package is read again and the install flow is executed.");
     public static string InfoCard2Title => Pick("Neler Yapar", "What It Does");
