@@ -11,16 +11,21 @@
         ShowInTaskbar="False"
         Topmost="True"
         Icon="/Assets/icon.ico">
-    <Border CornerRadius="16" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
-        <Grid Margin="24">
+    <Border CornerRadius="24" Background="{StaticResource HeroBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+        <Grid Margin="28">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Image Source="/Assets/icon.png" Width="120" Height="120" Stretch="Uniform" Margin="0,0,0,16"/>
-                <TextBlock Text="Kritter" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource AccentBrush}"/>
+                <Border Width="128" Height="128" CornerRadius="32" Background="{StaticResource AccentPanelBrush}" Margin="0,0,0,18">
+                    <Image Source="/Assets/icon.png" Width="92" Height="92" Stretch="Uniform" Margin="18"/>
+                </Border>
+                <TextBlock Text="Kritter" FontFamily="{StaticResource HeadingFont}" FontSize="32" FontWeight="Bold"
+                           HorizontalAlignment="Center" Foreground="{StaticResource TextBrush}"/>
+                <TextBlock Text="Release v2" FontSize="12" HorizontalAlignment="Center"
+                           Foreground="{StaticResource AccentBrush}" Margin="0,6,0,0"/>
             </StackPanel>
 
             <TextBlock Grid.Row="1"

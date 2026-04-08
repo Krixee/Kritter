@@ -30,6 +30,9 @@ public class KritterPackage
 
     [JsonPropertyName("setupInstallers")]
     public List<SetupInstaller> SetupInstallers { get; set; } = new();
+
+    [JsonPropertyName("gameSettingsBackups")]
+    public List<GameSettingsBackup> GameSettingsBackups { get; set; } = new();
 }
 
 public class ResumeInfo

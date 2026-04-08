@@ -22,6 +22,7 @@ public class FormatAtViewModel : BaseViewModel
     public ObservableCollection<WingetApp> InstalledApps { get; } = new();
     public ObservableCollection<WingetApp> CommonApps { get; } = new();
     public ObservableCollection<SetupInstaller> SetupInstallers { get; } = new();
+    public ObservableCollection<GameSettingsBackup> GameSettingsBackups { get; } = new();
 
     public bool IsScanning
     {
@@ -58,6 +59,7 @@ public class FormatAtViewModel : BaseViewModel
     }
 
     public bool HasSetupInstallers => SetupInstallers.Count > 0;
+    public bool HasGameSettingsBackups => GameSettingsBackups.Count > 0;
 
     public ICommand ScanCommand { get; }
     public ICommand CreatePackageCommand { get; }
@@ -65,6 +67,7 @@ public class FormatAtViewModel : BaseViewModel
     public ICommand DeselectAllInstalledCommand { get; }
     public ICommand ShowFr33tyModalCommand { get; }
     public ICommand SelectSetupFolderCommand { get; }
+    public ICommand SelectCs2AccountCommand { get; }
 
     public FormatAtViewModel()
     {
@@ -74,8 +77,10 @@ public class FormatAtViewModel : BaseViewModel
         DeselectAllInstalledCommand = new RelayCommand(() => { foreach (var a in InstalledApps) a.IsSelected = false; });
         ShowFr33tyModalCommand = new RelayCommand(ShowFr33tyModal);
         SelectSetupFolderCommand = new RelayCommand(async () => await SelectSetupFolderAsync(), () => !IsScanning);
+        SelectCs2AccountCommand = new RelayCommand(async () => await SelectCs2AccountAsync(), () => !IsScanning);
 
         SetupInstallers.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSetupInstallers));
+        GameSettingsBackups.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasGameSettingsBackups));
 
         Task.Run(async () =>
         {
@@ -166,9 +171,14 @@ public class FormatAtViewModel : BaseViewModel
             .Select(s => s.CloneForPackage())
             .ToList();
 
-        if (selectedApps.Count == 0 && selectedSetupInstallers.Count == 0)
+        var selectedGameSettings = GameSettingsBackups
+            .Where(g => g.IsSelected)
+            .Select(g => g.CloneForPackage())
+            .ToList();
+
+        if (selectedApps.Count == 0 && selectedSetupInstallers.Count == 0 && selectedGameSettings.Count == 0)
         {
-            MessageBox.Show("Lütfen en az bir uygulama veya setup dosyası seçin.", "Kritter", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Lütfen en az bir uygulama, setup dosyası veya oyun ayarı seçin.", "Kritter", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -183,7 +193,8 @@ public class FormatAtViewModel : BaseViewModel
                 DirectInstallerUrl = a.DirectInstallerUrl,
                 DirectInstallerArgs = a.DirectInstallerArgs
             }).ToList(),
-            SetupInstallers = selectedSetupInstallers
+            SetupInstallers = selectedSetupInstallers,
+            GameSettingsBackups = selectedGameSettings
         };
 
         if (SelectedMode == OptimizationMode.Fr33tyAll && _selectedFr33tyScripts != null)
@@ -220,6 +231,49 @@ public class FormatAtViewModel : BaseViewModel
     }
 
     private System.Collections.Generic.List<OptimizationScript>? _selectedFr33tyScripts;
+
+    private async Task SelectCs2AccountAsync()
+    {
+        StatusText = "Steam/CS2 hesapları aranıyor...";
+
+        try
+        {
+            var accounts = await GameSettingsService.DiscoverCs2AccountsAsync();
+            if (accounts.Count == 0)
+            {
+                MessageBox.Show(
+                    "Steam `userdata` içinde 730 klasörü bulunan bir hesap bulunamadı.",
+                    "Kritter",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                StatusText = "CS2 hesabı bulunamadı.";
+                return;
+            }
+
+            var vm = new SteamAccountSelectionViewModel(accounts);
+            var modal = new Views.SteamAccountSelectionWindow
+            {
+                DataContext = vm,
+                Owner = Application.Current.MainWindow
+            };
+
+            if (modal.ShowDialog() != true || vm.SelectedAccount == null)
+            {
+                StatusText = "CS2 hesap seçimi iptal edildi.";
+                return;
+            }
+
+            GameSettingsBackups.Clear();
+            GameSettingsBackups.Add(GameSettingsService.CreateCs2Backup(vm.SelectedAccount));
+
+            StatusText = $"CS2 hesabı seçildi: {vm.SelectedAccount.DisplayName}";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"CS2 hesapları okunamadı: {ex.Message}", "Kritter", MessageBoxButton.OK, MessageBoxImage.Error);
+            StatusText = "CS2 hesap taraması başarısız oldu.";
+        }
+    }
 
     private void ShowFr33tyModal()
     {

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -13,6 +14,7 @@ public static class PackageService
 {
     private const string PackageJsonEntry = "package.json";
     private const string SetupFilesFolder = "setup-files";
+    private const string GameSettingsFolder = "game-settings";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -23,7 +25,7 @@ public static class PackageService
     public static async Task SavePackageAsync(string path, KritterPackage package)
     {
         package.CreatedAt = DateTime.UtcNow;
-        package.Version = "1.1";
+        package.Version = "1.2";
 
         var tempRoot = Path.Combine(Path.GetTempPath(), "Kritter", "PackageBuild", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempRoot);
@@ -31,6 +33,7 @@ public static class PackageService
         try
         {
             PrepareSetupInstallers(package, tempRoot);
+            PrepareGameSettingsBackups(package, tempRoot);
 
             var json = JsonSerializer.Serialize(package, JsonOptions);
             var packageJsonPath = Path.Combine(tempRoot, PackageJsonEntry);
@@ -92,6 +95,7 @@ public static class PackageService
         }
 
         ExtractSetupInstallers(path, archive, package);
+        ExtractGameSettingsBackups(path, archive, package);
         return package;
     }
 
@@ -125,6 +129,31 @@ public static class PackageService
 
             installer.PackagePath = packageRelativePath.Replace('\\', '/');
             installer.FileName = Path.GetFileName(sourcePath);
+        }
+    }
+
+    private static void PrepareGameSettingsBackups(KritterPackage package, string tempRoot)
+    {
+        var settingsDir = Path.Combine(tempRoot, GameSettingsFolder);
+        Directory.CreateDirectory(settingsDir);
+
+        for (int i = 0; i < package.GameSettingsBackups.Count; i++)
+        {
+            var backup = package.GameSettingsBackups[i];
+            var sourcePath = backup.EffectiveSourcePath;
+            if (string.IsNullOrWhiteSpace(sourcePath) || !Directory.Exists(sourcePath))
+            {
+                throw new DirectoryNotFoundException($"Oyun ayari klasoru bulunamadi: {backup.DisplayName}");
+            }
+
+            var folderName = MakeSafeFileName($"{backup.Kind}_{backup.AccountId}_{backup.GameName}");
+            var packagedFolderName = $"{i + 1:D2}_{folderName}";
+            var packageRelativePath = $"{GameSettingsFolder}/{packagedFolderName}";
+            var destinationPath = Path.Combine(settingsDir, packagedFolderName);
+
+            CopyDirectory(sourcePath, destinationPath);
+
+            backup.PackagePath = packageRelativePath.Replace('\\', '/');
         }
     }
 
@@ -178,6 +207,58 @@ public static class PackageService
         }
     }
 
+    private static void ExtractGameSettingsBackups(string packagePath, ZipArchive archive, KritterPackage package)
+    {
+        if (package.GameSettingsBackups.Count == 0)
+        {
+            return;
+        }
+
+        var extractRoot = GetExtractionRoot(packagePath);
+        Directory.CreateDirectory(extractRoot);
+
+        foreach (var backup in package.GameSettingsBackups)
+        {
+            if (string.IsNullOrWhiteSpace(backup.PackagePath))
+            {
+                continue;
+            }
+
+            var entryPrefix = backup.PackagePath.Replace('\\', '/').TrimEnd('/') + "/";
+            var matchingEntries = archive.Entries
+                .Where(entry => entry.FullName.StartsWith(entryPrefix, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (matchingEntries.Count == 0)
+            {
+                continue;
+            }
+
+            var destinationRoot = Path.Combine(extractRoot, backup.PackagePath.Replace('/', Path.DirectorySeparatorChar));
+            Directory.CreateDirectory(destinationRoot);
+
+            foreach (var entry in matchingEntries)
+            {
+                if (string.IsNullOrEmpty(entry.Name))
+                {
+                    continue;
+                }
+
+                var relativePath = entry.FullName[entryPrefix.Length..].Replace('/', Path.DirectorySeparatorChar);
+                var destinationPath = Path.Combine(destinationRoot, relativePath);
+                var destinationDir = Path.GetDirectoryName(destinationPath);
+                if (!string.IsNullOrWhiteSpace(destinationDir))
+                {
+                    Directory.CreateDirectory(destinationDir);
+                }
+
+                entry.ExtractToFile(destinationPath, true);
+            }
+
+            backup.ResolvedPath = destinationRoot;
+        }
+    }
+
     private static KritterPackage? EnsurePackageDefaults(KritterPackage? package)
     {
         if (package == null)
@@ -188,6 +269,7 @@ public static class PackageService
         package.Apps ??= new System.Collections.Generic.List<WingetApp>();
         package.Fr33tyScripts ??= new System.Collections.Generic.List<OptimizationScript>();
         package.SetupInstallers ??= new System.Collections.Generic.List<SetupInstaller>();
+        package.GameSettingsBackups ??= new System.Collections.Generic.List<GameSettingsBackup>();
         return package;
     }
 
@@ -233,5 +315,29 @@ public static class PackageService
 
         var safe = new string(chars).Trim();
         return string.IsNullOrWhiteSpace(safe) ? "setup" : safe;
+    }
+
+    private static void CopyDirectory(string sourceDir, string destinationDir)
+    {
+        Directory.CreateDirectory(destinationDir);
+
+        foreach (var directory in Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(sourceDir, directory);
+            Directory.CreateDirectory(Path.Combine(destinationDir, relativePath));
+        }
+
+        foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(sourceDir, file);
+            var destinationPath = Path.Combine(destinationDir, relativePath);
+            var destinationParent = Path.GetDirectoryName(destinationPath);
+            if (!string.IsNullOrWhiteSpace(destinationParent))
+            {
+                Directory.CreateDirectory(destinationParent);
+            }
+
+            File.Copy(file, destinationPath, true);
+        }
     }
 }

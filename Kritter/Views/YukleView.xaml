@@ -1,11 +1,10 @@
 <UserControl x:Class="Kritter.Views.YukleView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="{StaticResource BgBrush}">
+             Background="Transparent">
 
-    <Grid Margin="32,24">
+    <Grid Margin="28,26">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -13,78 +12,104 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Title -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Yükle" FontSize="22" FontWeight="Bold" Margin="0,0,0,4"/>
-            <TextBlock Text="Bir .kritter paketi seçin ve yükleme işlemini başlatın."
-                       Foreground="{StaticResource TextSecondaryBrush}"/>
-        </StackPanel>
+        <Border Grid.Row="0" Style="{StaticResource HeroCard}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <!-- Load Package -->
-        <DockPanel Grid.Row="1" Margin="0,0,0,16">
-            <Button Content="Paket Seç" Style="{StaticResource AccentButton}"
-                    Command="{Binding LoadPackageCommand}" DockPanel.Dock="Left"/>
-        </DockPanel>
+                <StackPanel>
+                    <TextBlock Text="Yükle" Style="{StaticResource PageTitleText}"/>
+                    <TextBlock Text="Bir `.kritter` paketi seçin, kurulum akışını başlatın ve sisteminizi paketlenen içerikle tekrar ayağa kaldırın."
+                               Style="{StaticResource PageSubtitleText}" Margin="0,8,0,0" MaxWidth="680"/>
 
-        <!-- Package Info -->
-        <Border Grid.Row="2" Background="{StaticResource CardBrush}" CornerRadius="8"
-                Padding="16" Margin="0,0,0,16"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                    <WrapPanel Margin="0,20,0,0">
+                        <Border Style="{StaticResource MetricCard}" Width="180">
+                            <StackPanel>
+                                <TextBlock Text="Package Status" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                <TextBlock Text="{Binding HasPackage, StringFormat='{}{0}'}" FontFamily="{StaticResource HeadingFont}" FontSize="24"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource MetricCard}" Width="180">
+                            <StackPanel>
+                                <TextBlock Text="Running" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                <TextBlock Text="{Binding IsRunning, StringFormat='{}{0}'}" FontFamily="{StaticResource HeadingFont}" FontSize="24"/>
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                    <Button Content="Paket Seç" Style="{StaticResource AccentButton}"
+                            Command="{Binding LoadPackageCommand}" MinWidth="150"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Style="{StaticResource SectionCard}"
                 Visibility="{Binding LoadedPackage, Converter={StaticResource NullToVis}}">
-            <StackPanel>
-                <TextBlock Text="Paket Bilgisi" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                <TextBlock Text="{Binding PackageInfo}" Foreground="{StaticResource TextSecondaryBrush}"
-                           FontSize="12" TextWrapping="Wrap"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="Paket Bilgisi" FontFamily="{StaticResource HeadingFont}" FontSize="18" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding PackageInfo}" Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="13" TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="18,0,0,0" VerticalAlignment="Center">
+                    <Button Content="Yüklemeyi Başlat" Style="{StaticResource AccentButton}"
+                            Command="{Binding StartCommand}" FontSize="15" Padding="32,14"/>
+                    <TextBlock Text="{Binding CurrentStepText}" VerticalAlignment="Center"
+                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,12,0,0"
+                               FontSize="12" Width="220" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource SectionCard}"
+                Visibility="{Binding IsWaitingForRestart, Converter={StaticResource BoolToVis}}">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Yeniden Başlat" Style="{StaticResource AccentButton}"
+                        Command="{Binding RestartCommand}" FontSize="15" Padding="32,14"/>
+                <TextBlock Text="Optimizasyon tamamlandı. Devam etmek için yeniden başlatma bekleniyor."
+                           VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="16,0,0,0" FontSize="12"/>
             </StackPanel>
         </Border>
 
-        <!-- Start Button -->
-        <DockPanel Grid.Row="3" Margin="0,0,0,16"
-                   Visibility="{Binding LoadedPackage, Converter={StaticResource NullToVis}}">
-            <Button Content="Yüklemeyi Başlat" Style="{StaticResource AccentButton}"
-                    Command="{Binding StartCommand}" DockPanel.Dock="Left"
-                    FontSize="15" Padding="32,12"/>
-            <TextBlock Text="{Binding CurrentStepText}" VerticalAlignment="Center"
-                       Foreground="{StaticResource TextSecondaryBrush}" Margin="16,0,0,0"
-                       FontSize="12"/>
-        </DockPanel>
-
-        <!-- Log Area -->
-        <Border Grid.Row="4" Background="{StaticResource CardBrush}" CornerRadius="8"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                Padding="12" Margin="0,0,0,0">
+        <Border Grid.Row="3" Style="{StaticResource SectionCard}">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="İşlem Günlüğü" FontSize="13"
-                           FontWeight="SemiBold" Margin="0,0,0,8"
-                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                    <TextBlock Text="İşlem Günlüğü" FontFamily="{StaticResource HeadingFont}" FontSize="18"/>
+                    <TextBlock Text="Kurulum akışındaki tüm adımlar burada akıyor."
+                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+
                 <ListBox x:Name="LogList" ItemsSource="{Binding LogEntries}"
                          Background="Transparent" BorderThickness="0"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         FontFamily="Cascadia Mono, Consolas, Courier New"
+                         FontFamily="{StaticResource MonoFont}"
                          FontSize="12" Foreground="{StaticResource TextBrush}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,1"/>
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
             </DockPanel>
         </Border>
 
-        <!-- Running indicator -->
-        <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,8,0,0"
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,8,0,0"
                     Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}">
-            <TextBlock Text="&#x23F3;" FontSize="14" Margin="0,0,6,0"/>
-            <TextBlock Text="İşlem devam ediyor..." Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
-        </StackPanel>
-
-        <!-- Restart button (shown after optimization completes) -->
-        <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,8,0,0"
-                    Visibility="{Binding IsWaitingForRestart, Converter={StaticResource BoolToVis}}">
-            <Button Content="Yeniden Başlat" Style="{StaticResource AccentButton}"
-                    Command="{Binding RestartCommand}" FontSize="15" Padding="32,12"/>
-            <TextBlock Text="Yeniden başlatma bekleniyor..." VerticalAlignment="Center"
-                       Foreground="{StaticResource TextSecondaryBrush}" Margin="16,0,0,0" FontSize="12"/>
+            <Border Style="{StaticResource InfoPill}">
+                <TextBlock Text="Live Execution" FontSize="11" Foreground="{StaticResource AccentBrush}"/>
+            </Border>
+            <TextBlock Text="İşlem devam ediyor..." Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="10,2,0,0"/>
         </StackPanel>
     </Grid>
 </UserControl>

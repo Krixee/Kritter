@@ -109,11 +109,13 @@ public class YukleViewModel : BaseViewModel
             var wingetCount = pkg.Apps.Count(a => a.InstallMethod == InstallMethod.Winget);
             var directCount = pkg.Apps.Count(a => a.InstallMethod == InstallMethod.Direct);
             var setupCount = pkg.SetupInstallers.Count;
+            var gameSettingsCount = pkg.GameSettingsBackups.Count;
 
             PackageInfo =
                 $"Mod: {modeName}\n" +
                 $"Uygulama: {pkg.Apps.Count} adet (Winget: {wingetCount}, Direct: {directCount})\n" +
                 $"Setup: {setupCount} adet\n" +
+                $"Oyun ayarı: {gameSettingsCount} adet\n" +
                 $"Oluşturma: {pkg.CreatedAt:g}";
 
             if (pkg.OptimizationMode == OptimizationMode.Fr33tyAll && pkg.Fr33tyScripts.Count > 0)
@@ -153,6 +155,7 @@ public class YukleViewModel : BaseViewModel
         try
         {
             await InstallAppsPhase();
+            await RestoreGameSettingsPhase();
             await InstallSetupFilesPhase();
             await CleanupPhase();
             AddLog("");
@@ -206,6 +209,7 @@ public class YukleViewModel : BaseViewModel
             }
 
             await InstallAppsPhase();
+            await RestoreGameSettingsPhase();
             await InstallSetupFilesPhase();
             await CleanupPhase();
 
@@ -392,6 +396,43 @@ public class YukleViewModel : BaseViewModel
             }
 
             await DelayBetweenStepsAsync(i, LoadedPackage.SetupInstallers.Count);
+        }
+    }
+
+    private async Task RestoreGameSettingsPhase()
+    {
+        if (LoadedPackage?.GameSettingsBackups == null || LoadedPackage.GameSettingsBackups.Count == 0)
+        {
+            AddLog("Oyun ayarı geri yükleme gerekmiyor.");
+            return;
+        }
+
+        AddLog("");
+        AddLog("--- Oyun Ayarları Geri Yükleme Aşaması ---");
+
+        for (int i = 0; i < LoadedPackage.GameSettingsBackups.Count; i++)
+        {
+            var backup = LoadedPackage.GameSettingsBackups[i];
+            var pct = (int)((double)i / LoadedPackage.GameSettingsBackups.Count * 100);
+            var progressText = $"{backup.DisplayName} geri yükleniyor... %{pct}";
+            UpdateCurrentStep(progressText);
+            AddLiveLog(progressText);
+
+            var (success, output) = await GameSettingsService.RestoreAsync(backup);
+            if (success)
+            {
+                ReplaceLiveLog($"{backup.DisplayName} geri yüklendi.");
+            }
+            else
+            {
+                ReplaceLiveLog($"{backup.DisplayName} - geri yüklenemedi.");
+                if (!string.IsNullOrWhiteSpace(output))
+                {
+                    AddLog(output.Trim());
+                }
+            }
+
+            await DelayBetweenStepsAsync(i, LoadedPackage.GameSettingsBackups.Count);
         }
     }
 

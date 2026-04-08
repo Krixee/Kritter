@@ -4,13 +4,13 @@
         xmlns:vm="clr-namespace:Kritter.ViewModels"
         xmlns:views="clr-namespace:Kritter.Views"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="Kritter" Width="960" Height="640"
-        MinWidth="800" MinHeight="500"
+        Title="Kritter" Width="1280" Height="820"
+        MinWidth="1080" MinHeight="680"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         ResizeMode="CanResize"
         Icon="/Assets/icon.ico"
-        Background="{StaticResource BgBrush}">
+        Background="{StaticResource WindowBackgroundBrush}">
 
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="40"
@@ -24,70 +24,84 @@
         <vm:MainViewModel/>
     </Window.DataContext>
 
-    <Border Background="{StaticResource BgBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
-        <Grid>
+    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+        <Grid Margin="14">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Custom Title Bar -->
-            <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                <Grid Height="40" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Border Grid.Row="0" Background="{StaticResource PanelAltBrush}" CornerRadius="16" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Margin="0,0,0,14">
+                <Grid Height="54" Margin="12,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Kritter" FontSize="14" FontWeight="SemiBold"
-                               VerticalAlignment="Center" Margin="14,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="34" Height="34" Background="{StaticResource HeroBrush}" CornerRadius="10" Margin="0,0,12,0">
+                            <Image Source="/Assets/icon.png" Stretch="Uniform" Margin="5"/>
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="Kritter" FontFamily="{StaticResource HeadingFont}" FontSize="18" FontWeight="SemiBold"/>
+                            <TextBlock Text="Post-format setup, restore and optimization console"
+                                       FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Border Style="{StaticResource InfoPill}" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <TextBlock Text="v2.0" FontFamily="{StaticResource HeadingFont}" FontSize="11" Foreground="{StaticResource AccentBrush}"/>
+                        </Border>
                         <Button Content="_" Style="{StaticResource TitleBarButton}" Click="MinimizeButton_Click"/>
                         <Button Content="X" Style="{StaticResource TitleBarCloseButton}" Click="CloseButton_Click"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Main Layout -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="320"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Sidebar -->
-                <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}"
-                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Top" Margin="16,20,16,18">
-                            <TextBlock Text="Kritter" FontSize="22" FontWeight="Bold"
-                                       Foreground="{StaticResource AccentBrush}"/>
-                            <TextBlock Text="v1.0" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,2,0,0"/>
-                        </StackPanel>
+                <Border Grid.Column="0" Background="{StaticResource SidebarBrush}" CornerRadius="24"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Margin="0,0,16,0">
+                    <Grid Margin="18">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                        <StackPanel DockPanel.Dock="Bottom" Margin="12,0,12,12">
-                            <Border Background="{StaticResource PanelBrush}" CornerRadius="8" Padding="12"
-                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Margin="0,0,0,10">
-                                <StackPanel>
-                                    <TextBlock Text="Info" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6"
-                                               Foreground="{StaticResource AccentBrush}"/>
-                                    <TextBlock Text="Yapımcı: Krixe" FontSize="12" Margin="0,0,0,4"/>
-                                    <TextBlock Text="Uyarı: Optimizasyonlar sistem ayarlarını değiştirir; uygulamadan önce geri yükleme noktası önerilir."
-                                               FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
-                                    <TextBlock Text="Genel olarak arka plan yükünü azaltır, servis/başlangıç yapılandırmasını düzenler ve oyun performansını iyileştirmeyi hedefler."
-                                               FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <Border Grid.Row="0" Style="{StaticResource HeroCard}" Margin="0,0,0,16">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="52" Height="52" CornerRadius="14" Background="{StaticResource AccentPanelBrush}" Margin="0,0,14,0">
+                                        <Image Source="/Assets/icon.png" Stretch="Uniform" Margin="8"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Kritter" FontFamily="{StaticResource HeadingFont}" FontSize="24" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Release v2" Foreground="{StaticResource AccentBrush}" FontSize="12"/>
+                                    </StackPanel>
                                 </StackPanel>
-                            </Border>
+                                <TextBlock Text="Fresh install sonrası uygulamaları, yerel setup dosyalarını, CS2 ayarlarını ve optimizasyon akışını tek pakette toparlar."
+                                           Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,16,0,0"/>
+                            </StackPanel>
+                        </Border>
 
-                            <TextBlock Text="Windows Optimization &amp; Setup"
-                                       FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"
-                                       TextWrapping="Wrap" Opacity="0.7"/>
-                        </StackPanel>
+                        <Border Grid.Row="1" Style="{StaticResource SectionCard}" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Workspace" FontFamily="{StaticResource HeadingFont}" FontSize="13" Foreground="{StaticResource AccentBrush}"/>
+                                <TextBlock Text="Three guided flows" FontFamily="{StaticResource HeadingFont}" FontSize="20" Margin="0,8,0,6"/>
+                                <TextBlock Text="Format At ile paket oluştur, Yükle ile geri kur, Optimizasyon ile doğrudan script çalıştır."
+                                           Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="8,0">
+                        <StackPanel Grid.Row="2">
                             <RadioButton Style="{StaticResource NavButton}" Content="Format At"
                                          IsChecked="{Binding SelectedPageIndex, Converter={StaticResource EnumToBool}, ConverterParameter=0}"
                                          Command="{Binding NavigateFormatAtCommand}"/>
@@ -98,11 +112,23 @@
                                          IsChecked="{Binding SelectedPageIndex, Converter={StaticResource EnumToBool}, ConverterParameter=2}"
                                          Command="{Binding NavigateOptimizasyonCommand}"/>
                         </StackPanel>
-                    </DockPanel>
+
+                        <Border Grid.Row="3" Style="{StaticResource SectionCard}" Margin="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Notes" FontFamily="{StaticResource HeadingFont}" FontSize="13" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,8"/>
+                                <TextBlock Text="Author: Krixe" Margin="0,0,0,6"/>
+                                <TextBlock Text="Optimization scripts change Windows settings. A restore point is still the right baseline before use."
+                                           Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                <Border Style="{StaticResource InfoPill}" HorizontalAlignment="Left">
+                                    <TextBlock Text="Windows setup companion" FontSize="11" Foreground="{StaticResource AccentBrush}"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Border>
 
-                <!-- Content Area -->
-                <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" Margin="0">
+                <Border Grid.Column="1" Background="#120E1823" CornerRadius="24" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                    <ContentControl Content="{Binding CurrentPage}" Margin="0">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type vm:FormatAtViewModel}">
                             <views:FormatAtView/>
@@ -114,7 +140,8 @@
                             <views:OptimizasyonView/>
                         </DataTemplate>
                     </ContentControl.Resources>
-                </ContentControl>
+                    </ContentControl>
+                </Border>
             </Grid>
         </Grid>
     </Border>
