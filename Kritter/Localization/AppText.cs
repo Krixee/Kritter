@@ -9,7 +9,7 @@ public static class AppText
     private static string Pick(string tr, string en) => IsTurkish ? tr : en;
 
     public static string AppName => "Kritter";
-    public static string AppVersion => "v2.3";
+    public static string AppVersion => "v3";
     public static string WindowSubtitle => Pick("Format sonrası kurulum, geri yükleme ve optimizasyon konsolu", "Post-format setup, restore, and optimization console");
 
     public static string NavFormatAt => Pick("Format At", "Build Package");
@@ -43,7 +43,7 @@ public static class AppText
     public static string OptimizationModeTitle => Pick("Optimizasyon Modu", "Optimization Mode");
     public static string KritterRecommended => Pick("Kritter Önerilen", "Kritter Recommended");
     public static string Fr33tyAll => Pick("Fr33ty Tüm Optimizasyon", "Fr33ty Full Optimization");
-    public static string KeepCurrent => Pick("Şu anki ayarları koru", "Keep Current Settings");
+    public static string KeepCurrent => Pick("Varsayılan ayarlar (hiçbir şey değiştirilmez)", "Default settings (nothing is changed)");
     public static string SelectScripts => Pick("Scriptleri Seç...", "Select Scripts...");
     public static string CreatePackage => Pick("Paketi Oluştur", "Create Package");
 
@@ -102,6 +102,12 @@ public static class AppText
 
     public static string SplashStatus => Pick("Uygulamalar taranıyor...", "Scanning applications...");
     public static string ReleaseV2 => "Release v2";
+
+    public static string UpdateAvailableBadge(string latest) => Pick($"güncelleme mevcut: {latest}", $"update available: {latest}");
+    public static string UpdateAvailableTitle => Pick("Kritter Güncelleme", "Kritter Update");
+    public static string UpdateAvailableMessage(string latest, string current) => Pick(
+        $"Yeni bir sürüm mevcut: {latest}\nYüklü sürüm: {current}\n\nİndirme sayfasını açmak ister misiniz?",
+        $"A new version is available: {latest}\nInstalled version: {current}\n\nDo you want to open the download page?");
 
     public static string BuildPackageFilter => Pick("Kritter Paket (*.kritter)|*.kritter", "Kritter Package (*.kritter)|*.kritter");
     public static string SelectPackageTitle => Pick("Kritter Paketi Seç", "Select Kritter Package");

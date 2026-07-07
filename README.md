@@ -35,7 +35,7 @@ Yes, with a few conditions.
 
 ### SmartScreen And Smart App Control
 
-- The current public `Kritter-v2.3.0.exe` is unsigned.
+- The current public `Kritter-v3.0.0.exe` is unsigned.
 - Because of that, Windows SmartScreen or Smart App Control can warn users with messages like "Windows protected your PC".
 - There is no project-only flag that safely removes that warning for other people.
 - The real fix is signing the release with a publicly trusted code-signing identity and building reputation over time.
@@ -58,13 +58,13 @@ dotnet build Kritter.sln
 ### Publish
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.3.0
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 3.0.0
 ```
 
 ### Sign A Release
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.3.0 -SigningThumbprint "<CERT_THUMBPRINT>" -TimestampServer "<TIMESTAMP_URL>"
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 3.0.0 -SigningThumbprint "<CERT_THUMBPRINT>" -TimestampServer "<TIMESTAMP_URL>"
 ```
 
 ### Notes
@@ -110,7 +110,7 @@ Evet, ama birkaç şart var.
 
 ### SmartScreen ve Smart App Control
 
-- Şu anki public `Kritter-v2.3.0.exe` imzasızdır.
+- Şu anki public `Kritter-v3.0.0.exe` imzasızdır.
 - Bu yüzden Windows SmartScreen veya Smart App Control indiren kullanıcıya "Windows bilgisayarınızı korudu" benzeri uyarılar gösterebilir.
 - Bu uyarıyı başka kullanıcılar için güvenli biçimde kapatan bir proje ayarı yoktur.
 - Gerçek çözüm, release dosyasını public trust code-signing kimliğiyle imzalamak ve zamanla itibar kazanmaktır.
@@ -133,13 +133,13 @@ dotnet build Kritter.sln
 ### Yayın Alma
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.3.0
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 3.0.0
 ```
 
 ### İmzalı Release Alma
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 2.3.0 -SigningThumbprint "<SERTIFIKA_THUMBPRINT>" -TimestampServer "<TIMESTAMP_URL>"
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 3.0.0 -SigningThumbprint "<SERTIFIKA_THUMBPRINT>" -TimestampServer "<TIMESTAMP_URL>"
 ```
 
 ### Notlar

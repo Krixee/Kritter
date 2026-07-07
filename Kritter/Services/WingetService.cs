@@ -87,7 +87,28 @@ public static class WingetService
         "inno setup",
         "installer runtime",
         "microsoft edge",
-        "app installer"
+        "app installer",
+        // Media / image codec extensions (ship with Windows, auto-installed)
+        "hevc",
+        "heif",
+        "vp9 video",
+        "av1 video",
+        "raw image extension",
+        "webp image extension",
+        "web media extensions",
+        // Xbox / Game Bar stack
+        "xbox",
+        "game bar",
+        // Built-in Windows apps (Turkish + English display names)
+        "minecraft",
+        "hesap makinesi",
+        "not defteri",
+        // GPU / driver tooling explicitly requested to stay out of the reinstall list
+        "geforce",
+        "frameview",
+        "radeon software",
+        "realtek",
+        "engagement framework"
     };
 
     private static readonly string[] ExcludedIdPrefixes =
@@ -104,9 +125,56 @@ public static class WingetService
         "microsoft vclibs",
         "microsoft ui xaml",
         "microsoft desktopappinstaller",
+        "microsoft appinstaller",
         "nvidia physx",
         "msix microsoft vclibs",
-        "msix microsoft microsoftedge"
+        "msix microsoft microsoftedge",
+        // Media / image codec extensions
+        "microsoft hevcvideoextension",
+        "microsoft heifimageextension",
+        "microsoft vp9videoextensions",
+        "microsoft webmediaextensions",
+        "microsoft rawimageextension",
+        "microsoft webpimageextension",
+        "microsoft mpeg2videoextension",
+        "microsoft av1videoextension",
+        // Xbox / Game Bar / gaming stack
+        "microsoft xbox",
+        "microsoft gamingapp",
+        // Store & built-in Windows apps
+        "microsoft windowsstore",
+        "microsoft storepurchaseapp",
+        "microsoft windows photos",
+        "microsoft paint",
+        "microsoft mspaint",
+        "microsoft windowsnotepad",
+        "microsoft windowscalculator",
+        "microsoft screensketch",
+        "microsoft windowscamera",
+        "microsoft windowsmaps",
+        "microsoft microsoftstickynotes",
+        "microsoft windowssoundrecorder",
+        "microsoft zunemusic",
+        "microsoft zunevideo",
+        "microsoft bingweather",
+        "microsoft bingnews",
+        "microsoft gethelp",
+        "microsoft getstarted",
+        "microsoft windowsfeedbackhub",
+        "microsoft people",
+        "microsoft yourphone",
+        "microsoft windowscommunicationsapps",
+        "microsoft todos",
+        "microsoft powerautomatedesktop",
+        "microsoft windowsterminal",
+        "microsoft mixedreality portal",
+        "microsoft services store engagement",
+        "microsoft net native",
+        "microsoft minecraftlauncher",
+        "microsoft minecraftuwp",
+        "microsoft 549981c3f5f10",
+        "microsoftwindows client",
+        "clipchamp"
     };
 
     private static readonly List<ReinstallDefinition> ReinstallDefinitions = new()
@@ -976,7 +1044,10 @@ public static class WingetService
         }
 
         if (normalizedPublisher.Contains("nvidia", StringComparison.OrdinalIgnoreCase) &&
-            normalizedName.Contains("physx", StringComparison.OrdinalIgnoreCase))
+            (normalizedName.Contains("physx", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("graphics driver", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("geforce", StringComparison.OrdinalIgnoreCase) ||
+             normalizedName.Contains("frameview", StringComparison.OrdinalIgnoreCase)))
         {
             return true;
         }
